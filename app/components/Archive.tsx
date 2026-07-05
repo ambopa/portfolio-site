@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import ArchiveItem from "./ArchiveItem";
 import Lightbox from "./Lightbox";
-import { archiveItems, type ArchiveItemType } from "@/app/data/items";
+import { archiveItems, PROJECTS, type ArchiveItemType, type Project } from "@/app/data/items";
 
 function GridIcon2() {
   return (
@@ -34,57 +34,85 @@ function GridIcon5() {
 
 export default function Archive() {
   const [columns, setColumns] = useState(2);
+  const [activeFilter, setActiveFilter] = useState<Project | null>(null);
   const [lightboxItem, setLightboxItem] = useState<ArchiveItemType | null>(null);
 
-  const openLightbox = useCallback((item: ArchiveItemType) => {
-    setLightboxItem(item);
-  }, []);
+  const filteredItems = useMemo(
+    () => activeFilter ? archiveItems.filter((i) => i.project === activeFilter) : archiveItems,
+    [activeFilter]
+  );
 
-  const closeLightbox = useCallback(() => {
-    setLightboxItem(null);
-  }, []);
+  const openLightbox = useCallback((item: ArchiveItemType) => setLightboxItem(item), []);
+  const closeLightbox = useCallback(() => setLightboxItem(null), []);
 
   const goToPrev = useCallback(() => {
     if (!lightboxItem) return;
-    const idx = archiveItems.findIndex((i) => i.id === lightboxItem.id);
-    if (idx > 0) setLightboxItem(archiveItems[idx - 1]);
-  }, [lightboxItem]);
+    const idx = filteredItems.findIndex((i) => i.id === lightboxItem.id);
+    if (idx > 0) setLightboxItem(filteredItems[idx - 1]);
+  }, [lightboxItem, filteredItems]);
 
   const goToNext = useCallback(() => {
     if (!lightboxItem) return;
-    const idx = archiveItems.findIndex((i) => i.id === lightboxItem.id);
-    if (idx < archiveItems.length - 1) setLightboxItem(archiveItems[idx + 1]);
-  }, [lightboxItem]);
+    const idx = filteredItems.findIndex((i) => i.id === lightboxItem.id);
+    if (idx < filteredItems.length - 1) setLightboxItem(filteredItems[idx + 1]);
+  }, [lightboxItem, filteredItems]);
 
-  // Distribute items into N columns (left-to-right, top-to-bottom like masonry)
+  // Distribute filtered items into N columns
   const columnArrays: ArchiveItemType[][] = Array.from({ length: columns }, () => []);
-  archiveItems.forEach((item, idx) => {
+  filteredItems.forEach((item, idx) => {
     columnArrays[idx % columns].push(item);
   });
 
   return (
     <>
       <div className="relative z-10 bg-[var(--background)]">
-        {/* Toolbar */}
-        <div className="flex items-center justify-between py-4 font-mono text-[12px]">
-          <span className="text-black/40">Архив</span>
-          <div className="flex items-center gap-3">
-            <GridIcon2 />
-            <input
-              type="range"
-              min={1}
-              max={5}
-              step={1}
-              value={columns}
-              onChange={(e) => setColumns(Number(e.target.value))}
-              aria-label="Archive column count"
-              className="w-20 accent-black"
-            />
-            <GridIcon5 />
-          </div>
+
+        {/* Фильтры */}
+        <div className="flex flex-wrap gap-2 py-4 text-[12px]">
+          <button
+            type="button"
+            onClick={() => setActiveFilter(null)}
+            className={`rounded-full px-3 py-1 transition-colors duration-200 ${
+              activeFilter === null
+                ? "bg-black text-white"
+                : "bg-black/5 text-black/50 hover:bg-black/10 hover:text-black"
+            }`}
+          >
+            Все проекты
+          </button>
+          {PROJECTS.map((project) => (
+            <button
+              key={project}
+              type="button"
+              onClick={() => setActiveFilter(project === activeFilter ? null : project)}
+              className={`rounded-full px-3 py-1 transition-colors duration-200 ${
+                activeFilter === project
+                  ? "bg-black text-white"
+                  : "bg-black/5 text-black/50 hover:bg-black/10 hover:text-black"
+              }`}
+            >
+              {project}
+            </button>
+          ))}
         </div>
 
-        {/* Grid */}
+        {/* Ползунок колонок */}
+        <div className="flex items-center justify-end gap-3 pb-4 font-mono text-[12px]">
+          <GridIcon2 />
+          <input
+            type="range"
+            min={1}
+            max={5}
+            step={1}
+            value={columns}
+            onChange={(e) => setColumns(Number(e.target.value))}
+            aria-label="Количество колонок"
+            className="w-20 accent-black"
+          />
+          <GridIcon5 />
+        </div>
+
+        {/* Сетка */}
         <div className="flex gap-3">
           {columnArrays.map((col, colIdx) => (
             <div key={colIdx} className="min-w-0 flex-1">
@@ -99,11 +127,15 @@ export default function Archive() {
             </div>
           ))}
         </div>
+
+        {filteredItems.length === 0 && (
+          <p className="py-16 text-center text-[12px] text-black/30">Нет проектов</p>
+        )}
       </div>
 
       <Lightbox
         item={lightboxItem}
-        items={archiveItems}
+        items={filteredItems}
         onClose={closeLightbox}
         onPrev={goToPrev}
         onNext={goToNext}
