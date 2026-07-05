@@ -7,40 +7,37 @@ export default function Footer() {
     <footer className="border-t border-black/5 py-6 text-[11px] text-black/30">
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
-          {/* ЗАМЕНИТЕ: ваше имя */}
-          <p className="text-black/40">Your Name</p>
-          {/* ЗАМЕНИТЕ: ваше местоположение */}
-          <p>[Your City], [Country]</p>
+          <p className="text-black/40">Алексей Шайхелисламов</p>
+          <p>Москва, Россия</p>
         </div>
 
         <div className="flex flex-col gap-1 md:items-end">
-          {/* ЗАМЕНИТЕ: ваши контакты */}
           <a
-            href="mailto:you@yourdomain.com"
+            href="mailto:aleksei@fleksit.ru"
             className="hover:text-black/60 transition-colors duration-200"
           >
-            you@yourdomain.com
+            aleksei@fleksit.ru
           </a>
           <a
-            href="https://www.instagram.com/"
+            href="https://t.me/AlekseiShai"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-black/60 transition-colors duration-200"
           >
-            Instagram
+            Telegram
           </a>
           <a
-            href="https://twitter.com/"
+            href="https://linkedin.com/in/alekseishaikhelislamov"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-black/60 transition-colors duration-200"
           >
-            Twitter
+            LinkedIn
           </a>
         </div>
 
         <div className="md:text-right">
-          <p>&copy; {year} Your Name. All rights reserved.</p>
+          <p>&copy; {year} Алексей Шайхелисламов</p>
         </div>
       </div>
     </footer>

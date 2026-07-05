@@ -67,7 +67,7 @@ export default function Archive() {
       <div className="relative z-10 bg-[var(--background)]">
         {/* Toolbar */}
         <div className="flex items-center justify-between py-4 font-mono text-[12px]">
-          <span className="text-black/40">Archives</span>
+          <span className="text-black/40">Архив</span>
           <div className="flex items-center gap-3">
             <GridIcon2 />
             <input
