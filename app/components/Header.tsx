@@ -36,7 +36,7 @@ export default function Header() {
       <div ref={col2Ref}>
         <p>Задаю дизайн-стратегию продукта целиком, строю системы,</p>
         <p>на которые опирается вся команда, и отвечаю за бизнес-результат.</p>
-        <p className="mt-3">Lead Designer / Principal Product Designer</p>
+        <p className="mt-3">Principal Product Designer / Lead Designer</p>
         <p>Москва, Россия · Готов к переезду</p>
       </div>
 
