@@ -3,7 +3,8 @@
 import { useState, useCallback, useMemo } from "react";
 import ArchiveItem from "./ArchiveItem";
 import Lightbox from "./Lightbox";
-import { archiveItems, PROJECTS, type ArchiveItemType, type Project } from "@/app/data/items";
+import { PROJECTS, archiveItems as staticItems, type ArchiveItemType, type Project } from "@/app/data/items";
+import type { SanityProject } from "@/sanity/lib/queries";
 
 function GridIcon2() {
   return (
@@ -32,14 +33,47 @@ function GridIcon5() {
   );
 }
 
-export default function Archive() {
+// Convert Sanity projects to flat ArchiveItemType list
+function sanityToItems(projects: SanityProject[]): ArchiveItemType[] {
+  let id = 1000;
+  const result: ArchiveItemType[] = [];
+  for (const p of projects) {
+    const title = p.title as Project;
+    const items = p.gallery ?? (p.coverImage ? [p.coverImage] : []);
+    for (const g of items) {
+      result.push({
+        id: id++,
+        label: g.caption || p.title,
+        project: title,
+        aspectW: g.width || 1920,
+        aspectH: g.height || 1080,
+        imageSrc: g.videoUrl ? undefined : g.url,
+        poster: g.videoUrl ? g.url : undefined,
+        videoSrc: g.videoUrl || undefined,
+      });
+    }
+  }
+  return result;
+}
+
+type Props = { sanityProjects?: SanityProject[] };
+
+export default function Archive({ sanityProjects }: Props) {
   const [columns, setColumns] = useState(2);
   const [activeFilter, setActiveFilter] = useState<Project | null>(null);
   const [lightboxItem, setLightboxItem] = useState<ArchiveItemType | null>(null);
 
+  // Use Sanity data if available, fallback to static
+  const allItems = useMemo<ArchiveItemType[]>(() => {
+    if (sanityProjects && sanityProjects.length > 0) {
+      return sanityToItems(sanityProjects);
+    }
+    return staticItems;
+  }, [sanityProjects]);
+
   const filteredItems = useMemo(
-    () => activeFilter ? archiveItems.filter((i) => i.project === activeFilter) : archiveItems,
-    [activeFilter]
+    () => (activeFilter ? allItems.filter((i) => i.project === activeFilter) : allItems),
+    [activeFilter, allItems]
   );
 
   const openLightbox = useCallback((item: ArchiveItemType) => setLightboxItem(item), []);
@@ -57,7 +91,6 @@ export default function Archive() {
     if (idx < filteredItems.length - 1) setLightboxItem(filteredItems[idx + 1]);
   }, [lightboxItem, filteredItems]);
 
-  // Distribute filtered items into N columns
   const columnArrays: ArchiveItemType[][] = Array.from({ length: columns }, () => []);
   filteredItems.forEach((item, idx) => {
     columnArrays[idx % columns].push(item);
@@ -66,7 +99,6 @@ export default function Archive() {
   return (
     <>
       <div className="relative z-10 bg-[var(--background)]">
-
         {/* Фильтры */}
         <div className="flex flex-wrap gap-2 py-4 text-[12px]">
           <button
