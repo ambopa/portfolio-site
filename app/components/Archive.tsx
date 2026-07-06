@@ -144,8 +144,8 @@ export default function Archive({ sanityProjects }: Props) {
   return (
     <>
       <div className="relative z-10 bg-[var(--background)]">
-        {/* Фильтры + ползунок в одну строку */}
-        <div className="flex items-center justify-between gap-3 py-4 text-[12px]">
+        {/* Фильтры + ползунок */}
+        <div className="flex flex-col gap-2 py-4 text-[12px] lg:flex-row lg:items-center lg:justify-between lg:gap-3">
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
