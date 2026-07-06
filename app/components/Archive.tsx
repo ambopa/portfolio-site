@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
+import ReactMarkdown from "react-markdown";
 import ArchiveItem from "./ArchiveItem";
 import Lightbox from "./Lightbox";
 import { PROJECTS, archiveItems as staticItems, type ArchiveItemType, type Project } from "@/app/data/items";
@@ -111,6 +112,10 @@ export default function Archive({ sanityProjects }: Props) {
     columnArrays[idx % columns].push(item);
   });
 
+  const activeProject = activeFilter
+    ? (sanityProjects ?? []).find((p) => p.title === activeFilter)
+    : null;
+
   return (
     <>
       <div className="relative z-10 bg-[var(--background)]">
@@ -163,6 +168,19 @@ export default function Archive({ sanityProjects }: Props) {
         <div className="flex gap-3">
           {columnArrays.map((col, colIdx) => (
             <div key={colIdx} className="min-w-0 flex-1">
+              {colIdx === 0 && activeProject?.description && (
+                <div
+                  className="mb-3 flex flex-col justify-between rounded-[12px] bg-black/[0.03] p-5"
+                  style={{ aspectRatio: "3/4" }}
+                >
+                  <p className="text-[11px] font-light leading-[1.5] text-black/40">
+                    {activeProject.title}
+                  </p>
+                  <div className="text-[12px] font-light leading-[1.5] text-black/80 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mb-1 [&_p]:mb-2 [&_strong]:font-medium [&_em]:italic">
+                    <ReactMarkdown>{activeProject.description}</ReactMarkdown>
+                  </div>
+                </div>
+              )}
               {col.map((item, itemIdx) => (
                 <ArchiveItem
                   key={item.id}
