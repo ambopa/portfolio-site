@@ -58,7 +58,7 @@ function sanityToItems(projects: SanityProject[]): ArchiveItemType[] {
 type Props = { sanityProjects?: SanityProject[] };
 
 export default function Archive({ sanityProjects }: Props) {
-  const [columns, setColumns] = useState(2);
+  const [columns, setColumns] = useState(3);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [lightboxItem, setLightboxItem] = useState<ArchiveItemType | null>(null);
 
