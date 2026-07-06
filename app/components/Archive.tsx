@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import ArchiveItem from "./ArchiveItem";
 import Lightbox from "./Lightbox";
@@ -68,8 +68,18 @@ type Props = { sanityProjects?: SanityProject[] };
 
 export default function Archive({ sanityProjects }: Props) {
   const [columns, setColumns] = useState(3);
+  const [isMobile, setIsMobile] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [lightboxItem, setLightboxItem] = useState<ArchiveItemType | null>(null);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 1024);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  const effectiveColumns = isMobile ? 2 : columns;
 
   // Use Sanity data if available, fallback to static
   const allItems = useMemo<ArchiveItemType[]>(() => {
@@ -107,9 +117,9 @@ export default function Archive({ sanityProjects }: Props) {
     if (idx < filteredItems.length - 1) setLightboxItem(filteredItems[idx + 1]);
   }, [lightboxItem, filteredItems]);
 
-  const columnArrays: ArchiveItemType[][] = Array.from({ length: columns }, () => []);
+  const columnArrays: ArchiveItemType[][] = Array.from({ length: effectiveColumns }, () => []);
   filteredItems.forEach((item, idx) => {
-    columnArrays[idx % columns].push(item);
+    columnArrays[idx % effectiveColumns].push(item);
   });
 
   const activeProject = activeFilter
@@ -149,7 +159,7 @@ export default function Archive({ sanityProjects }: Props) {
         </div>
 
         {/* Ползунок колонок */}
-        <div className="flex items-center justify-end gap-3 pb-4 font-mono text-[12px]">
+        <div className={`flex items-center justify-end gap-3 pb-4 font-mono text-[12px] ${isMobile ? "hidden" : ""}`}>
           <GridIcon2 />
           <input
             type="range"
