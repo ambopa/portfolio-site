@@ -145,7 +145,7 @@ export default function Archive({ sanityProjects }: Props) {
     <>
       <div className="relative z-10 bg-[var(--background)]">
         {/* Фильтры + ползунок */}
-        <div className="flex flex-col gap-2 py-4 text-[12px] lg:flex-row lg:items-center lg:justify-between lg:gap-3">
+        <div className="flex flex-col gap-2 py-4 text-[12px] md:flex-row md:items-center md:justify-between md:gap-3">
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -173,7 +173,7 @@ export default function Archive({ sanityProjects }: Props) {
               </button>
             ))}
           </div>
-          <div className="flex shrink-0 items-center gap-3 font-mono py-8 lg:py-0">
+          <div className="flex shrink-0 items-center gap-3 font-mono py-6 md:py-0">
             <GridIcon2 />
             <input
               type="range"
