@@ -33,6 +33,11 @@ function GridIcon5() {
   );
 }
 
+function optimizeUrl(url: string | undefined, width: number): string | undefined {
+  if (!url || !url.includes("cdn.sanity.io")) return url;
+  return `${url}?w=${width}&auto=format&q=82&fit=max`;
+}
+
 // Convert Sanity projects to flat ArchiveItemType list
 function sanityToItems(projects: SanityProject[]): ArchiveItemType[] {
   let id = 1000;
@@ -40,14 +45,16 @@ function sanityToItems(projects: SanityProject[]): ArchiveItemType[] {
   for (const p of projects) {
     const items = p.gallery ?? (p.coverImage ? [p.coverImage] : []);
     for (const g of items) {
+      const rawUrl = g.videoUrl ? undefined : g.url;
+      const rawPoster = g.videoUrl ? g.url : undefined;
       result.push({
         id: id++,
         label: g.caption || p.title,
         project: p.title,
         aspectW: g.width || 1920,
         aspectH: g.height || 1080,
-        imageSrc: g.videoUrl ? undefined : g.url,
-        poster: g.videoUrl ? g.url : undefined,
+        imageSrc: optimizeUrl(rawUrl, 1200),
+        poster: optimizeUrl(rawPoster, 1200),
         videoSrc: g.videoUrl || undefined,
       });
     }
