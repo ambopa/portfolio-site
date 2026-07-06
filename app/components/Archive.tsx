@@ -86,13 +86,15 @@ export default function Archive({ sanityProjects }: Props) {
   const [lightboxItem, setLightboxItem] = useState<ArchiveItemType | null>(null);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 1024);
+    const check = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (mobile) setColumns((prev) => Math.min(prev, 2));
+    };
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
-
-  const effectiveColumns = isMobile ? 2 : columns;
 
   // Use Sanity data if available, fallback to static
   const allItems = useMemo<ArchiveItemType[]>(() => {
@@ -130,9 +132,9 @@ export default function Archive({ sanityProjects }: Props) {
     if (idx < filteredItems.length - 1) setLightboxItem(filteredItems[idx + 1]);
   }, [lightboxItem, filteredItems]);
 
-  const columnArrays: ArchiveItemType[][] = Array.from({ length: effectiveColumns }, () => []);
+  const columnArrays: ArchiveItemType[][] = Array.from({ length: columns }, () => []);
   filteredItems.forEach((item, idx) => {
-    columnArrays[idx % effectiveColumns].push(item);
+    columnArrays[idx % columns].push(item);
   });
 
   const activeProject = activeFilter
