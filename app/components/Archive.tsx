@@ -64,14 +64,31 @@ function sanityToItems(projects: SanityProject[]): ArchiveItemType[] {
   return result;
 }
 
-const mdClass = "text-[12px] font-light leading-[1.5] text-black/80 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mb-1 [&_p]:mb-2 [&_strong]:font-medium [&_em]:italic [&_h1]:font-medium [&_h1]:mb-2 [&_h2]:font-medium [&_h2]:mb-1 [&_h3]:font-medium [&_h3]:mb-1 [&_h4]:font-medium [&_h4]:mb-1 [&_h5]:font-medium [&_h5]:mb-1 [&_h6]:font-medium [&_h6]:mb-1";
+type MdProps = { children?: React.ReactNode };
+const mdComponents = {
+  h1: ({ children }: MdProps) => <h1 style={{ fontWeight: 500, marginBottom: "0.25rem", marginTop: "1.25rem" }}>{children}</h1>,
+  h2: ({ children }: MdProps) => <h2 style={{ fontWeight: 500, marginBottom: "0.25rem", marginTop: "1.25rem" }}>{children}</h2>,
+  h3: ({ children }: MdProps) => <h3 style={{ fontWeight: 500, marginBottom: "0.25rem", marginTop: "1rem" }}>{children}</h3>,
+  h4: ({ children }: MdProps) => <h4 style={{ fontWeight: 500, marginBottom: "0.25rem", marginTop: "1rem" }}>{children}</h4>,
+  h5: ({ children }: MdProps) => <h5 style={{ fontWeight: 500, marginBottom: "0.25rem", marginTop: "1rem" }}>{children}</h5>,
+  h6: ({ children }: MdProps) => <h6 style={{ fontWeight: 500, marginBottom: "0.25rem", marginTop: "1rem" }}>{children}</h6>,
+  p: ({ children }: MdProps) => <p style={{ marginBottom: "0.5rem" }}>{children}</p>,
+  strong: ({ children }: MdProps) => <strong style={{ fontWeight: 500 }}>{children}</strong>,
+  em: ({ children }: MdProps) => <em style={{ fontStyle: "italic" }}>{children}</em>,
+  ul: ({ children }: MdProps) => <ul style={{ listStyleType: "disc", paddingLeft: "1rem", marginBottom: "0.5rem" }}>{children}</ul>,
+  ol: ({ children }: MdProps) => <ol style={{ listStyleType: "decimal", paddingLeft: "1rem", marginBottom: "0.5rem" }}>{children}</ol>,
+  li: ({ children }: MdProps) => <li style={{ marginBottom: "0.25rem" }}>{children}</li>,
+};
 
 function DescriptionCard({ project }: { project: SanityProject }) {
   return (
-    <div className="mb-3 flex flex-col gap-4 rounded-[12px] bg-black/[0.03] p-5">
+    <div className="mb-3 min-w-0 overflow-hidden flex flex-col gap-4 rounded-[12px] bg-black/[0.03] p-5">
       <p className="text-[11px] font-light leading-[1.5] text-black/40">{project.title}</p>
-      <div className={mdClass}>
-        <ReactMarkdown>{project.description}</ReactMarkdown>
+      <div
+        className="text-[12px] font-light leading-[1.5] text-black/80"
+        style={{ overflowWrap: "break-word", wordBreak: "break-word" }}
+      >
+        <ReactMarkdown components={mdComponents}>{project.description}</ReactMarkdown>
       </div>
     </div>
   );

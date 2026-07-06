@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Алексей Шайхелисламов",
-  description: "Lead Designer / Principal Product Designer. Москва, Россия.",
+  description: "Principal Product Designer / Lead Designer. Москва, Россия.",
   icons: {
     icon: "/favicon.svg",
   },
