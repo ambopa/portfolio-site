@@ -40,6 +40,15 @@ export default function Header() {
       </div>
 
       <div ref={col3Ref} className="shrink-0">
+        <p className="mb-3">
+          <a
+            href="/cv.pdf"
+            download="Алексей Шайхелисламов — CV.pdf"
+            className="hover:opacity-60 transition-opacity duration-200"
+          >
+            [Скачать CV]
+          </a>
+        </p>
         <p>
           <a
             href="https://t.me/AlekseiShai"
