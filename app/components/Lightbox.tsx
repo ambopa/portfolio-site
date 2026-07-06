@@ -124,10 +124,10 @@ export default function Lightbox({ item, items, onClose, onPrev, onNext }: Props
           >
             <source src={item.videoSrc} />
           </video>
-        ) : item.imageSrc ? (
+        ) : (item.fullSrc || item.imageSrc) ? (
           <img
             key={item.id}
-            src={item.imageSrc}
+            src={item.fullSrc || item.imageSrc}
             alt={item.label}
             className="max-w-[90vw] max-h-[85vh] rounded-[12px] shadow-2xl object-contain"
           />

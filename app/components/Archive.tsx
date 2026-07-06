@@ -54,6 +54,7 @@ function sanityToItems(projects: SanityProject[]): ArchiveItemType[] {
         aspectW: g.width || 1920,
         aspectH: g.height || 1080,
         imageSrc: optimizeUrl(rawUrl, 1200),
+        fullSrc: optimizeUrl(rawUrl, 2800),
         poster: optimizeUrl(rawPoster, 1200),
         videoSrc: g.videoUrl || undefined,
       });

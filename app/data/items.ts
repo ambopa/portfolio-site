@@ -15,7 +15,8 @@ export type ArchiveItemType = {
   project: string;
   aspectW: number;
   aspectH: number;
-  imageSrc?: string;
+  imageSrc?: string;   // оптимизированная для сетки
+  fullSrc?: string;    // высокое разрешение для лайтбокса
   videoSrc?: string;
   poster?: string;
 };
