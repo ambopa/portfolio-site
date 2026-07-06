@@ -68,10 +68,7 @@ const mdClass = "text-[12px] font-light leading-[1.5] text-black/80 [&_ul]:list-
 
 function DescriptionCard({ project }: { project: SanityProject }) {
   return (
-    <div
-      className="mb-3 flex flex-col justify-between rounded-[12px] bg-black/[0.03] p-5"
-      style={{ aspectRatio: "3/4" }}
-    >
+    <div className="mb-3 flex flex-col gap-4 rounded-[12px] bg-black/[0.03] p-5">
       <p className="text-[11px] font-light leading-[1.5] text-black/40">{project.title}</p>
       <div className={mdClass}>
         <ReactMarkdown>{project.description}</ReactMarkdown>
