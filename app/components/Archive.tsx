@@ -173,7 +173,7 @@ export default function Archive({ sanityProjects }: Props) {
               </button>
             ))}
           </div>
-          <div className="flex shrink-0 items-center gap-3 font-mono">
+          <div className="flex shrink-0 items-center gap-3 font-mono py-8 lg:py-0">
             <GridIcon2 />
             <input
               type="range"
