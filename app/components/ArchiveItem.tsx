@@ -77,6 +77,11 @@ export default function ArchiveItem({ item, onOpen, priority = false }: Props) {
     setImgLoaded(true);
   }, []);
 
+  // Если картинка уже в кеше — onLoad не сработает, проверяем вручную
+  useEffect(() => {
+    if (imgRef.current?.complete) setImgLoaded(true);
+  }, []);
+
   const handleVideoCanPlay = useCallback(() => {
     setVideoReady(true);
   }, []);
