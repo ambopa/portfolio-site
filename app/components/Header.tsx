@@ -33,7 +33,7 @@ export default function Header() {
         </a>
       </div>
 
-      <div ref={col2Ref}>
+      <div ref={col2Ref} className="max-w-[400px]">
         <p>Строю дизайн-стратегию под&nbsp;бизнес-цели с&nbsp;учётом зрелости продукта и&nbsp;выстраиваю дизайн-процессы в&nbsp;кросс-функциональной команде. А&nbsp;так-же: приоритизирую, провожу исследования и&nbsp;перевожу инсайты в&nbsp;измеримый результат.</p>
         <p className="mt-3">Principal Product Designer&nbsp;/ Lead Designer</p>
         <p>Москва,&nbsp;Россия · Готов к&nbsp;переезду</p>
