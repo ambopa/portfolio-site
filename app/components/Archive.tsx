@@ -64,6 +64,22 @@ function sanityToItems(projects: SanityProject[]): ArchiveItemType[] {
   return result;
 }
 
+const mdClass = "text-[12px] font-light leading-[1.5] text-black/80 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mb-1 [&_p]:mb-2 [&_strong]:font-medium [&_em]:italic [&_h1]:font-medium [&_h1]:mb-2 [&_h2]:font-medium [&_h2]:mb-1 [&_h3]:font-medium [&_h3]:mb-1 [&_h4]:font-medium [&_h4]:mb-1 [&_h5]:font-medium [&_h5]:mb-1 [&_h6]:font-medium [&_h6]:mb-1";
+
+function DescriptionCard({ project }: { project: SanityProject }) {
+  return (
+    <div
+      className="mb-3 flex flex-col justify-between rounded-[12px] bg-black/[0.03] p-5"
+      style={{ aspectRatio: "3/4" }}
+    >
+      <p className="text-[11px] font-light leading-[1.5] text-black/40">{project.title}</p>
+      <div className={mdClass}>
+        <ReactMarkdown>{project.description}</ReactMarkdown>
+      </div>
+    </div>
+  );
+}
+
 type Props = { sanityProjects?: SanityProject[] };
 
 export default function Archive({ sanityProjects }: Props) {
@@ -159,7 +175,7 @@ export default function Archive({ sanityProjects }: Props) {
         </div>
 
         {/* Ползунок колонок */}
-        <div className={`flex items-center justify-end gap-3 pb-4 font-mono text-[12px] ${isMobile ? "hidden" : ""}`}>
+        <div className="flex items-center justify-end gap-3 pb-4 font-mono text-[12px]">
           <GridIcon2 />
           <input
             type="range"
@@ -174,22 +190,17 @@ export default function Archive({ sanityProjects }: Props) {
           <GridIcon5 />
         </div>
 
+        {/* Карточка описания на мобильном — над сеткой, на всю ширину */}
+        {isMobile && activeProject?.description && (
+          <DescriptionCard project={activeProject} />
+        )}
+
         {/* Сетка */}
         <div className="flex gap-3">
           {columnArrays.map((col, colIdx) => (
             <div key={colIdx} className="min-w-0 flex-1">
-              {colIdx === 0 && activeProject?.description && (
-                <div
-                  className="mb-3 flex flex-col justify-between rounded-[12px] bg-black/[0.03] p-5"
-                  style={{ aspectRatio: "3/4" }}
-                >
-                  <p className="text-[11px] font-light leading-[1.5] text-black/40">
-                    {activeProject.title}
-                  </p>
-                  <div className="text-[12px] font-light leading-[1.5] text-black/80 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mb-1 [&_p]:mb-2 [&_strong]:font-medium [&_em]:italic [&_h1]:font-medium [&_h1]:mb-2 [&_h2]:font-medium [&_h2]:mb-1 [&_h3]:font-medium [&_h3]:mb-1 [&_h4]:font-medium [&_h4]:mb-1 [&_h5]:font-medium [&_h5]:mb-1 [&_h6]:font-medium [&_h6]:mb-1">
-                    <ReactMarkdown>{activeProject.description}</ReactMarkdown>
-                  </div>
-                </div>
+              {colIdx === 0 && !isMobile && activeProject?.description && (
+                <DescriptionCard project={activeProject} />
               )}
               {col.map((item, itemIdx) => (
                 <ArchiveItem
