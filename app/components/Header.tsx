@@ -44,9 +44,9 @@ export default function Header() {
           <a
             href="/cv.pdf"
             download="Алексей Шайхелисламов — CV.pdf"
-            className="hover:opacity-60 transition-opacity duration-200"
+            className="inline-block rounded-full bg-black px-4 py-1.5 text-[13px] text-white hover:opacity-70 transition-opacity duration-200"
           >
-            [Скачать CV]
+            Скачать CV
           </a>
         </p>
         <p>
