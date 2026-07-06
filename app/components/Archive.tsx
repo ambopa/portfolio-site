@@ -38,13 +38,12 @@ function sanityToItems(projects: SanityProject[]): ArchiveItemType[] {
   let id = 1000;
   const result: ArchiveItemType[] = [];
   for (const p of projects) {
-    const title = p.title as Project;
     const items = p.gallery ?? (p.coverImage ? [p.coverImage] : []);
     for (const g of items) {
       result.push({
         id: id++,
         label: g.caption || p.title,
-        project: title,
+        project: p.title,
         aspectW: g.width || 1920,
         aspectH: g.height || 1080,
         imageSrc: g.videoUrl ? undefined : g.url,
@@ -60,7 +59,7 @@ type Props = { sanityProjects?: SanityProject[] };
 
 export default function Archive({ sanityProjects }: Props) {
   const [columns, setColumns] = useState(2);
-  const [activeFilter, setActiveFilter] = useState<Project | null>(null);
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [lightboxItem, setLightboxItem] = useState<ArchiveItemType | null>(null);
 
   // Use Sanity data if available, fallback to static
@@ -69,6 +68,14 @@ export default function Archive({ sanityProjects }: Props) {
       return sanityToItems(sanityProjects);
     }
     return staticItems;
+  }, [sanityProjects]);
+
+  // Filters come from Sanity project titles, fallback to static PROJECTS
+  const filterList = useMemo<string[]>(() => {
+    if (sanityProjects && sanityProjects.length > 0) {
+      return sanityProjects.map((p) => p.title);
+    }
+    return PROJECTS;
   }, [sanityProjects]);
 
   const filteredItems = useMemo(
@@ -112,7 +119,7 @@ export default function Archive({ sanityProjects }: Props) {
           >
             Все проекты
           </button>
-          {PROJECTS.map((project) => (
+          {filterList.map((project) => (
             <button
               key={project}
               type="button"

@@ -1,9 +1,5 @@
-export type Project =
-  | "Qandy"
-  | "MTS Bank"
-  | "Kaspersky"
-  | "Mos.ru"
-  | "Multitransfer";
+// Статический фолбэк — используется только если Sanity недоступен
+export type Project = string;
 
 export const PROJECTS: Project[] = [
   "Qandy",
@@ -16,7 +12,7 @@ export const PROJECTS: Project[] = [
 export type ArchiveItemType = {
   id: number;
   label: string;
-  project: Project;
+  project: string;
   aspectW: number;
   aspectH: number;
   imageSrc?: string;
