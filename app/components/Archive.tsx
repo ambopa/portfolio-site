@@ -176,7 +176,7 @@ export default function Archive({ sanityProjects }: Props) {
                   <p className="text-[11px] font-light leading-[1.5] text-black/40">
                     {activeProject.title}
                   </p>
-                  <div className="text-[12px] font-light leading-[1.5] text-black/80 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mb-1 [&_p]:mb-2 [&_strong]:font-medium [&_em]:italic">
+                  <div className="text-[12px] font-light leading-[1.5] text-black/80 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mb-1 [&_p]:mb-2 [&_strong]:font-medium [&_em]:italic [&_h1]:font-medium [&_h1]:mb-2 [&_h2]:font-medium [&_h2]:mb-1 [&_h3]:font-medium [&_h3]:mb-1">
                     <ReactMarkdown>{activeProject.description}</ReactMarkdown>
                   </div>
                 </div>
