@@ -144,49 +144,49 @@ export default function Archive({ sanityProjects }: Props) {
   return (
     <>
       <div className="relative z-10 bg-[var(--background)]">
-        {/* Фильтры */}
-        <div className="flex flex-wrap gap-2 py-4 text-[12px]">
-          <button
-            type="button"
-            onClick={() => setActiveFilter(null)}
-            className={`rounded-full px-3 py-1 transition-colors duration-200 ${
-              activeFilter === null
-                ? "bg-black text-white"
-                : "bg-black/5 text-black/50 hover:bg-black/10 hover:text-black"
-            }`}
-          >
-            Все проекты
-          </button>
-          {filterList.map((project) => (
+        {/* Фильтры + ползунок в одну строку */}
+        <div className="flex items-center justify-between gap-3 py-4 text-[12px]">
+          <div className="flex flex-wrap gap-2">
             <button
-              key={project}
               type="button"
-              onClick={() => setActiveFilter(project === activeFilter ? null : project)}
+              onClick={() => setActiveFilter(null)}
               className={`rounded-full px-3 py-1 transition-colors duration-200 ${
-                activeFilter === project
+                activeFilter === null
                   ? "bg-black text-white"
                   : "bg-black/5 text-black/50 hover:bg-black/10 hover:text-black"
               }`}
             >
-              {project}
+              Все проекты
             </button>
-          ))}
-        </div>
-
-        {/* Ползунок колонок */}
-        <div className="flex items-center justify-end gap-3 pb-4 font-mono text-[12px]">
-          <GridIcon2 />
-          <input
-            type="range"
-            min={1}
-            max={5}
-            step={1}
-            value={columns}
-            onChange={(e) => setColumns(Number(e.target.value))}
-            aria-label="Количество колонок"
-            className="w-20 accent-black"
-          />
-          <GridIcon5 />
+            {filterList.map((project) => (
+              <button
+                key={project}
+                type="button"
+                onClick={() => setActiveFilter(project === activeFilter ? null : project)}
+                className={`rounded-full px-3 py-1 transition-colors duration-200 ${
+                  activeFilter === project
+                    ? "bg-black text-white"
+                    : "bg-black/5 text-black/50 hover:bg-black/10 hover:text-black"
+                }`}
+              >
+                {project}
+              </button>
+            ))}
+          </div>
+          <div className="flex shrink-0 items-center gap-3 font-mono">
+            <GridIcon2 />
+            <input
+              type="range"
+              min={1}
+              max={5}
+              step={1}
+              value={columns}
+              onChange={(e) => setColumns(Number(e.target.value))}
+              aria-label="Количество колонок"
+              className="w-20 accent-black"
+            />
+            <GridIcon5 />
+          </div>
         </div>
 
         {/* Карточка описания на мобильном — над сеткой, на всю ширину */}
