@@ -4,6 +4,7 @@ export const projectsQuery = groq`
   *[_type == "project"] | order(order asc) {
     _id,
     title,
+    titleEn,
     description,
     descriptionEn,
     "coverImage": {
@@ -32,6 +33,7 @@ export type SanityGalleryItem = {
 export type SanityProject = {
   _id: string;
   title: string;
+  titleEn?: string;
   description?: string;
   descriptionEn?: string;
   coverImage?: SanityGalleryItem;

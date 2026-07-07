@@ -85,7 +85,9 @@ function DescriptionCard({ project, lang }: { project: SanityProject; lang: Lang
   const text = lang === "en" && project.descriptionEn ? project.descriptionEn : project.description;
   return (
     <div className="mb-3 min-w-0 overflow-hidden flex flex-col gap-4 rounded-[12px] bg-black/[0.03] p-5">
-      <p className="text-[11px] font-light leading-[1.5] text-black/40">{project.title}</p>
+      <p className="text-[11px] font-light leading-[1.5] text-black/40">
+        {lang === "en" && project.titleEn ? project.titleEn : project.title}
+      </p>
       <div
         className="text-[12px] font-light leading-[1.5] text-black/80"
         style={{ overflowWrap: "break-word", wordBreak: "break-word" }}
@@ -123,12 +125,12 @@ export default function Archive({ sanityProjects, lang }: Props) {
     return staticItems;
   }, [sanityProjects]);
 
-  // Filters come from Sanity project titles, fallback to static PROJECTS
-  const filterList = useMemo<string[]>(() => {
+  // Filters come from Sanity projects; keep title as internal ID, titleEn for display
+  const filterList = useMemo<{ title: string; titleEn?: string }[]>(() => {
     if (sanityProjects && sanityProjects.length > 0) {
-      return sanityProjects.map((p) => p.title);
+      return sanityProjects.map((p) => ({ title: p.title, titleEn: p.titleEn }));
     }
-    return PROJECTS;
+    return PROJECTS.map((t) => ({ title: t }));
   }, [sanityProjects]);
 
   const filteredItems = useMemo(
@@ -177,18 +179,18 @@ export default function Archive({ sanityProjects, lang }: Props) {
             >
               {i18n[lang].allProjects}
             </button>
-            {filterList.map((project) => (
+            {filterList.map(({ title, titleEn }) => (
               <button
-                key={project}
+                key={title}
                 type="button"
-                onClick={() => setActiveFilter(project === activeFilter ? null : project)}
+                onClick={() => setActiveFilter(title === activeFilter ? null : title)}
                 className={`rounded-full px-3 py-1 transition-colors duration-200 ${
-                  activeFilter === project
+                  activeFilter === title
                     ? "bg-black text-white"
                     : "bg-black/5 text-black/50 hover:bg-black/10 hover:text-black"
                 }`}
               >
-                {project}
+                {lang === "en" && titleEn ? titleEn : title}
               </button>
             ))}
           </div>

@@ -7,10 +7,16 @@ export const project = defineType({
   fields: [
     defineField({
       name: "title",
-      title: "Название проекта",
+      title: "Название проекта (RU)",
       type: "string",
       description: "Например: Finframe, MTS Bank, Kaspersky",
       validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "titleEn",
+      title: "Project name (EN)",
+      type: "string",
+      description: "If different from RU title, e.g. Qandy CIS • UAE",
     }),
     defineField({
       name: "slug",
