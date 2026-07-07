@@ -6,6 +6,7 @@ import ArchiveItem from "./ArchiveItem";
 import Lightbox from "./Lightbox";
 import { PROJECTS, archiveItems as staticItems, type ArchiveItemType, type Project } from "@/app/data/items";
 import type { SanityProject } from "@/sanity/lib/queries";
+import { i18n, type Lang } from "@/app/i18n";
 
 function GridIcon2() {
   return (
@@ -80,7 +81,8 @@ const mdComponents = {
   li: ({ children }: MdProps) => <li style={{ marginBottom: "0.25rem" }}>{children}</li>,
 };
 
-function DescriptionCard({ project }: { project: SanityProject }) {
+function DescriptionCard({ project, lang }: { project: SanityProject; lang: Lang }) {
+  const text = lang === "en" && project.descriptionEn ? project.descriptionEn : project.description;
   return (
     <div className="mb-3 min-w-0 overflow-hidden flex flex-col gap-4 rounded-[12px] bg-black/[0.03] p-5">
       <p className="text-[11px] font-light leading-[1.5] text-black/40">{project.title}</p>
@@ -88,15 +90,15 @@ function DescriptionCard({ project }: { project: SanityProject }) {
         className="text-[12px] font-light leading-[1.5] text-black/80"
         style={{ overflowWrap: "break-word", wordBreak: "break-word" }}
       >
-        <ReactMarkdown components={mdComponents}>{project.description}</ReactMarkdown>
+        <ReactMarkdown components={mdComponents}>{text}</ReactMarkdown>
       </div>
     </div>
   );
 }
 
-type Props = { sanityProjects?: SanityProject[] };
+type Props = { sanityProjects?: SanityProject[]; lang: Lang };
 
-export default function Archive({ sanityProjects }: Props) {
+export default function Archive({ sanityProjects, lang }: Props) {
   const [columns, setColumns] = useState(3);
   const [isMobile, setIsMobile] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
@@ -173,7 +175,7 @@ export default function Archive({ sanityProjects }: Props) {
                   : "bg-black/5 text-black/50 hover:bg-black/10 hover:text-black"
               }`}
             >
-              Все проекты
+              {i18n[lang].allProjects}
             </button>
             {filterList.map((project) => (
               <button
@@ -208,7 +210,7 @@ export default function Archive({ sanityProjects }: Props) {
 
         {/* Карточка описания на мобильном — над сеткой, на всю ширину */}
         {isMobile && activeProject?.description && (
-          <DescriptionCard project={activeProject} />
+          <DescriptionCard project={activeProject} lang={lang} />
         )}
 
         {/* Сетка */}
@@ -216,7 +218,7 @@ export default function Archive({ sanityProjects }: Props) {
           {columnArrays.map((col, colIdx) => (
             <div key={colIdx} className="min-w-0 flex-1">
               {colIdx === 0 && !isMobile && activeProject?.description && (
-                <DescriptionCard project={activeProject} />
+                <DescriptionCard project={activeProject} lang={lang} />
               )}
               {col.map((item, itemIdx) => (
                 <ArchiveItem
@@ -231,7 +233,7 @@ export default function Archive({ sanityProjects }: Props) {
         </div>
 
         {filteredItems.length === 0 && (
-          <p className="py-16 text-center text-[12px] text-black/30">Нет проектов</p>
+          <p className="py-16 text-center text-[12px] text-black/30">{i18n[lang].noProjects}</p>
         )}
       </div>
 

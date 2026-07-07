@@ -5,6 +5,7 @@ export const projectsQuery = groq`
     _id,
     title,
     description,
+    descriptionEn,
     "coverImage": {
       "url": coverImage.asset->url,
       "width": coverImage.asset->metadata.dimensions.width,
@@ -32,6 +33,7 @@ export type SanityProject = {
   _id: string;
   title: string;
   description?: string;
+  descriptionEn?: string;
   coverImage?: SanityGalleryItem;
   gallery?: SanityGalleryItem[];
 };

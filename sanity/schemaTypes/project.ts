@@ -21,7 +21,13 @@ export const project = defineType({
     }),
     defineField({
       name: "description",
-      title: "Описание проекта",
+      title: "Описание проекта (RU)",
+      type: "text",
+      rows: 4,
+    }),
+    defineField({
+      name: "descriptionEn",
+      title: "Project description (EN)",
       type: "text",
       rows: 4,
     }),
