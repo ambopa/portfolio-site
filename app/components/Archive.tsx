@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, useLayoutEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import ArchiveItem from "./ArchiveItem";
 import Lightbox from "./Lightbox";
@@ -116,6 +116,9 @@ export default function Archive({ sanityProjects, lang }: Props) {
   const [isMobile, setIsMobile] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [lightboxItem, setLightboxItem] = useState<ArchiveItemType | null>(null);
+  const [descriptionRatioHeight, setDescriptionRatioHeight] = useState(0);
+  const descriptionWrapperRef = useRef<HTMLDivElement>(null);
+  const gridContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const check = () => {
@@ -166,6 +169,9 @@ export default function Archive({ sanityProjects, lang }: Props) {
 
   const columnArrays: ArchiveItemType[][] = Array.from({ length: columns }, () => []);
   const columnHeights = Array.from({ length: columns }, () => 0);
+  if (!isMobile && descriptionRatioHeight > 0) {
+    columnHeights[0] = descriptionRatioHeight;
+  }
   filteredItems.forEach((item) => {
     const shortest = columnHeights.indexOf(Math.min(...columnHeights));
     columnArrays[shortest].push(item);
@@ -175,6 +181,17 @@ export default function Archive({ sanityProjects, lang }: Props) {
   const activeProject = activeFilter
     ? (sanityProjects ?? []).find((p) => p.title === activeFilter)
     : null;
+
+  useLayoutEffect(() => {
+    if (!isMobile && activeProject?.description && descriptionWrapperRef.current && gridContainerRef.current) {
+      const h = descriptionWrapperRef.current.offsetHeight;
+      const containerW = gridContainerRef.current.offsetWidth;
+      const colW = (containerW - (columns - 1) * 12) / columns;
+      setDescriptionRatioHeight(h / colW);
+    } else {
+      setDescriptionRatioHeight(0);
+    }
+  }, [isMobile, activeProject, columns]);
 
   return (
     <>
@@ -230,11 +247,13 @@ export default function Archive({ sanityProjects, lang }: Props) {
         )}
 
         {/* Сетка */}
-        <div className="flex gap-3">
+        <div ref={gridContainerRef} className="flex gap-3">
           {columnArrays.map((col, colIdx) => (
             <div key={colIdx} className="min-w-0 flex-1">
               {colIdx === 0 && !isMobile && activeProject?.description && (
-                <DescriptionCard project={activeProject} lang={lang} />
+                <div ref={descriptionWrapperRef}>
+                  <DescriptionCard project={activeProject} lang={lang} />
+                </div>
               )}
               {col.map((item, itemIdx) => (
                 <ArchiveItem
