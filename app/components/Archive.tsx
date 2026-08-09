@@ -165,8 +165,11 @@ export default function Archive({ sanityProjects, lang }: Props) {
   }, [lightboxItem, filteredItems]);
 
   const columnArrays: ArchiveItemType[][] = Array.from({ length: columns }, () => []);
-  filteredItems.forEach((item, idx) => {
-    columnArrays[idx % columns].push(item);
+  const columnHeights = Array.from({ length: columns }, () => 0);
+  filteredItems.forEach((item) => {
+    const shortest = columnHeights.indexOf(Math.min(...columnHeights));
+    columnArrays[shortest].push(item);
+    columnHeights[shortest] += item.aspectH / item.aspectW;
   });
 
   const activeProject = activeFilter
