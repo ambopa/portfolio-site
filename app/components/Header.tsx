@@ -61,8 +61,8 @@ export default function Header({ lang }: Props) {
         </div>
         <p className="mb-3">
           <a
-            href="/cv.pdf"
-            download="Алексей Шайхелисламов — CV.pdf"
+            href={t.cvFile}
+            download={t.cvFilename}
             className="inline-block rounded-full bg-black px-4 py-1.5 text-[13px] text-white hover:opacity-70 transition-opacity duration-200"
           >
             {t.downloadCv}
