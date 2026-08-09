@@ -3,9 +3,9 @@
 import { useEffect, useRef } from "react";
 import { i18n, type Lang } from "@/app/i18n";
 
-type Props = { lang: Lang; onToggleLang: (lang: Lang) => void };
+type Props = { lang: Lang };
 
-export default function Header({ lang, onToggleLang }: Props) {
+export default function Header({ lang }: Props) {
   const col1Ref = useRef<HTMLDivElement>(null);
   const col2Ref = useRef<HTMLDivElement>(null);
   const col3Ref = useRef<HTMLDivElement>(null);
@@ -32,7 +32,7 @@ export default function Header({ lang, onToggleLang }: Props) {
   return (
     <header className="flex flex-col gap-6 py-6 text-[12px] font-light leading-[1.4] md:flex-row md:items-start md:gap-8">
       <div ref={col1Ref} className="shrink-0">
-        <a href="/" className="hover:opacity-60 transition-opacity duration-200">
+        <a href={`/${lang}`} className="hover:opacity-60 transition-opacity duration-200">
           {t.name}
         </a>
       </div>
@@ -45,21 +45,19 @@ export default function Header({ lang, onToggleLang }: Props) {
 
       <div ref={col3Ref} className="shrink-0">
         <div className="flex items-center gap-0 mb-3 font-mono text-[11px]">
-          <button
-            type="button"
-            onClick={() => onToggleLang("ru")}
+          <a
+            href="/ru"
             className={`flex items-center justify-center min-w-[40px] min-h-[40px] transition-opacity duration-200 ${lang === "ru" ? "text-black" : "text-black/30 hover:text-black/60"}`}
           >
             RU
-          </button>
+          </a>
           <span className="text-black/20">/</span>
-          <button
-            type="button"
-            onClick={() => onToggleLang("en")}
+          <a
+            href="/en"
             className={`flex items-center justify-center min-w-[40px] min-h-[40px] transition-opacity duration-200 ${lang === "en" ? "text-black" : "text-black/30 hover:text-black/60"}`}
           >
             EN
-          </button>
+          </a>
         </div>
         <p className="mb-3">
           <a

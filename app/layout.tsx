@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Алексей Шайхелисламов",
-  description: "Principal Product Designer / Lead Designer. Москва, Россия.",
+  title: "Aleksei Shaikhelislamov",
+  description: "Principal Product Designer / Lead Designer. Citizen of the World.",
   icons: {
     icon: "/favicon.svg",
   },
@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru" className={`${inter.variable} ${geistMono.variable}`}>
+    <html lang="en" className={`${inter.variable} ${geistMono.variable}`}>
       <body className="antialiased">{children}</body>
     </html>
   );
