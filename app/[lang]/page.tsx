@@ -8,10 +8,6 @@ const LANGS: Lang[] = ["ru", "en"];
 
 export const revalidate = 60;
 
-export async function generateStaticParams() {
-  return LANGS.map((lang) => ({ lang }));
-}
-
 export default async function Home({
   params,
 }: {
