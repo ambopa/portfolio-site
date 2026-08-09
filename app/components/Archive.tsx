@@ -66,6 +66,7 @@ function sanityToItems(projects: SanityProject[]): ArchiveItemType[] {
 }
 
 type MdProps = { children?: React.ReactNode };
+type MdAProps = { children?: React.ReactNode; href?: string };
 const mdComponents = {
   h1: ({ children }: MdProps) => <h1 style={{ fontWeight: 500, marginBottom: "0.25rem", marginTop: "1.25rem" }}>{children}</h1>,
   h2: ({ children }: MdProps) => <h2 style={{ fontWeight: 500, marginBottom: "0.25rem", marginTop: "1.25rem" }}>{children}</h2>,
@@ -79,6 +80,16 @@ const mdComponents = {
   ul: ({ children }: MdProps) => <ul style={{ listStyleType: "disc", paddingLeft: "1rem", marginBottom: "0.5rem" }}>{children}</ul>,
   ol: ({ children }: MdProps) => <ol style={{ listStyleType: "decimal", paddingLeft: "1rem", marginBottom: "0.5rem" }}>{children}</ol>,
   li: ({ children }: MdProps) => <li style={{ marginBottom: "0.25rem" }}>{children}</li>,
+  a: ({ children, href }: MdAProps) => (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-block mt-2 rounded-full bg-black px-4 py-1.5 text-[11px] text-white hover:opacity-70 transition-opacity duration-200"
+    >
+      {children}
+    </a>
+  ),
 };
 
 function DescriptionCard({ project, lang }: { project: SanityProject; lang: Lang }) {
