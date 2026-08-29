@@ -38,7 +38,11 @@ export default function Header({ lang }: Props) {
       </div>
 
       <div ref={col2Ref} className="max-w-[400px]">
-        <p>{t.bio}</p>
+        {t.bio.split("\n\n").map((para, i) => (
+          <p key={i} className={i > 0 ? "mt-3" : undefined}>
+            {para}
+          </p>
+        ))}
         <p className="mt-3">{t.role}</p>
         <p>{t.location}</p>
       </div>

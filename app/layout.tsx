@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Aleksei Shaikhelislamov",
-  description: "Principal Product Designer / Lead Designer. Citizen of the World.",
+  description: "Principal Product Designer × AI Prototyping. Citizen of the World.",
   icons: {
     icon: "/favicon.svg",
   },

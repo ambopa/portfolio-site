@@ -3,8 +3,8 @@ export type Lang = "ru" | "en";
 export const i18n = {
   ru: {
     name: "Алексей Шайхелисламов",
-    bio: "Строю дизайн-стратегию под бизнес-цели с учётом зрелости продукта и выстраиваю дизайн-процессы в кросс-функциональной команде. А так-же: провожу исследования, приоритизирую, и перевожу инсайты в измеримый результат.",
-    role: "Principal Product Designer / Lead Designer",
+    bio: "14 лет в продуктовом дизайне. Отвечаю не за экраны, а за продуктовое направление: стратегию, дизайн-системы и бизнес-результат, который они приносят — Kaspersky, МТС, Правительство Москвы, S7 Airlines.\n\nПри этом довожу гипотезу до работающего продукта, а не до макета: последний собрал за 26 дней в одиночку, AI вместо команды разработки.",
+    role: "Principal Product Designer × AI Prototyping",
     location: "Человек мира · Часовой пояс по договорённости",
     cvFile: "/cv-ru.pdf",
     cvFilename: "Алексей Шайхелисламов — CV.pdf",
@@ -15,8 +15,8 @@ export const i18n = {
   },
   en: {
     name: "Aleksei Shaikhelislamov",
-    bio: "I build design strategy aligned with business goals and product maturity, establish design processes in cross-functional teams. I also conduct research, prioritise, and translate insights into measurable outcomes.",
-    role: "Principal Product Designer / Lead Designer",
+    bio: "14 years in product design. I own the product direction, not individual screens — strategy, design systems, and the business result behind them: Kaspersky, MTS, Moscow City Government, S7 Airlines.\n\nAnd I take a hypothesis all the way to a working product, not a mockup: the last one built solo in 26 days, AI instead of an engineering team.",
+    role: "Principal Product Designer × AI Prototyping",
     location: "Citizen of the World · Timezone negotiable",
     cvFile: "/cv-en.pdf",
     cvFilename: "Aleksei Shaikhelislamov — CV.pdf",
