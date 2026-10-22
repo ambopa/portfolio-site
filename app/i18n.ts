@@ -3,7 +3,7 @@ export type Lang = "ru" | "en";
 export const i18n = {
   ru: {
     name: "Алексей Шайхелисламов",
-    bio: "14 лет в продуктовом дизайне. Отвечаю не за экраны, а за продуктовое направление: стратегию, дизайн-системы и бизнес-результат, который они приносят — Kaspersky, МТС, Правительство Москвы, S7 Airlines.",
+    bio: "14 лет в продуктовом дизайне.\nОтвечаю за результат целиком — от исследования и дизайн-стратегии до дизайн-систем и бизнес-метрик. Kaspersky, МТС, Правительство Москвы, S7 Airlines.\n\nС AI в короткие сроки запускаю и тестирую гипотезы, автоматизирую и оптимизирую процессы, а также повышаю качество и стабильность дизайн-решений.",
     role: "Principal Product Designer × AI",
     location: "Человек мира · Часовой пояс по договорённости",
     cvFile: "/cv-ru.pdf",
@@ -15,7 +15,7 @@ export const i18n = {
   },
   en: {
     name: "Aleksei Shaikhelislamov",
-    bio: "14 years in product design. I own the product direction, not individual screens — strategy, design systems, and the business result behind them: Kaspersky, MTS, Moscow City Government, S7 Airlines.",
+    bio: "14 years in product design.\nI own the whole outcome — from research and design strategy to design systems and business metrics. Kaspersky, MTS, Moscow City Government, S7 Airlines.\n\nWith AI, I rapidly launch and test hypotheses, automate and optimize processes, and raise the quality and consistency of design decisions.",
     role: "Principal Product Designer × AI",
     location: "Citizen of the World · Timezone negotiable",
     cvFile: "/cv-en.pdf",

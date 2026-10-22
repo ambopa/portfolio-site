@@ -39,7 +39,7 @@ export default function Header({ lang }: Props) {
 
       <div ref={col2Ref} className="max-w-[400px]">
         {t.bio.split("\n\n").map((para, i) => (
-          <p key={i} className={i > 0 ? "mt-3" : undefined}>
+          <p key={i} className={i > 0 ? "mt-3 whitespace-pre-line" : "whitespace-pre-line"}>
             {para}
           </p>
         ))}
