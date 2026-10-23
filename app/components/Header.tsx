@@ -67,7 +67,7 @@ export default function Header({ lang }: Props) {
           <a
             href={t.cvFile}
             download={t.cvFilename}
-            className="inline-block rounded-full bg-black px-4 py-1.5 text-[13px] text-white hover:opacity-70 transition-opacity duration-200"
+            className="inline-block rounded-full bg-black px-4 py-1.5 text-[13px] text-white selection:bg-white/30 selection:text-white hover:opacity-70 transition-opacity duration-200"
           >
             {t.downloadCv}
           </a>
