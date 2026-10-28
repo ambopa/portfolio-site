@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { ArchiveItemType } from "@/app/data/items";
+import { queueVideo, unqueueVideo } from "./videoQueue";
 
 // AV1 main profile, level 4.0, 8-bit: browsers without an AV1 decoder skip to the H.264 source
 export const AV1_TYPE = 'video/mp4; codecs="av01.0.08M.08"';
@@ -54,15 +55,17 @@ export default function ArchiveItem({ item, onOpen, priority = false }: Props) {
     return () => observer.disconnect();
   }, [priority]);
 
-  // Video: start buffering shortly before it scrolls into view, play only while visible
+  // Video: queue its download shortly before it scrolls into view, play only while visible.
+  // play() would start the download itself, so it waits until the queue has started it.
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !item.videoSrc) return;
+    let visible = false;
 
     const preloader = new IntersectionObserver(
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) {
-          video.preload = "auto";
+          queueVideo(video);
           preloader.disconnect();
         }
       },
@@ -73,20 +76,25 @@ export default function ArchiveItem({ item, onOpen, priority = false }: Props) {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            video.play().catch(() => {});
-          } else {
-            video.pause();
-          }
+          visible = entry.isIntersecting;
+          if (!visible) video.pause();
+          else if (video.preload === "auto") video.play().catch(() => {});
         });
       },
       { threshold: 0.3 }
     );
-
     observer.observe(video);
+
+    const playIfVisible = () => {
+      if (visible) video.play().catch(() => {});
+    };
+    video.addEventListener("canplay", playIfVisible);
+
     return () => {
       preloader.disconnect();
       observer.disconnect();
+      unqueueVideo(video);
+      video.removeEventListener("canplay", playIfVisible);
     };
   }, [item.videoSrc]);
 
