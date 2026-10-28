@@ -19,8 +19,10 @@ export const projectsQuery = groq`
       caption,
       videoUrl,
       videoAv1Url,
+      videoHevcUrl,
       videoHdUrl,
       videoHdAv1Url,
+      videoHdHevcUrl,
     },
   }
 `;
@@ -32,8 +34,10 @@ export type SanityGalleryItem = {
   caption?: string;
   videoUrl?: string;
   videoAv1Url?: string;
+  videoHevcUrl?: string;
   videoHdUrl?: string;
   videoHdAv1Url?: string;
+  videoHdHevcUrl?: string;
 };
 
 export type SanityProject = {

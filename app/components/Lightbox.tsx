@@ -23,6 +23,7 @@ function LightboxVideo({ item }: { item: ArchiveItemType }) {
           alt=""
           h264={item.videoHdSrc}
           av1={item.videoHdAv1Src}
+          hevc={item.videoHdHevcSrc}
           load
           play
           eager
@@ -36,6 +37,7 @@ function LightboxVideo({ item }: { item: ArchiveItemType }) {
           alt={item.label}
           h264={item.videoSrc!}
           av1={item.videoAv1Src}
+          hevc={item.videoHevcSrc}
           load
           play
           eager

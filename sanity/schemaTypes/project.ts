@@ -77,6 +77,12 @@ export const project = defineType({
               description: "Опционально — та же анимация в AV1: легче, браузер возьмёт её, если умеет",
             }),
             defineField({
+              name: "videoHevcUrl",
+              title: "Видео HEVC (MP4)",
+              type: "url",
+              description: "Опционально — та же анимация в HEVC: для Safari на устройствах Apple без AV1",
+            }),
+            defineField({
               name: "videoHdUrl",
               title: "Видео HD для полноэкранного просмотра (MP4)",
               type: "url",
@@ -85,6 +91,11 @@ export const project = defineType({
             defineField({
               name: "videoHdAv1Url",
               title: "Видео HD в AV1 (MP4)",
+              type: "url",
+            }),
+            defineField({
+              name: "videoHdHevcUrl",
+              title: "Видео HD в HEVC (MP4)",
               type: "url",
             }),
           ],

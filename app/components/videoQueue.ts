@@ -10,12 +10,16 @@
 const MAX_LOADING = 3;
 // A slow file stops holding a slot after this long; it keeps downloading in the background
 const SLOT_MS = 5000;
-// "Near" = within one screen height above or below the viewport
+// "Near" = within one screen height above or below the viewport: downloads start there
 const NEAR_MARGIN = "100% 0px";
+// A downloaded video is dropped only farther than three screens: scrolling back and forth
+// never restarts the videos around the screen
+const KEEP_MARGIN = "300% 0px";
 
 type Entry = {
   setLoad: (load: boolean) => void;
   near: boolean;
+  keep: boolean;
   // The observer has reported this card's position at least once
   seen: boolean;
   state: "idle" | "loading" | "done";
@@ -24,6 +28,7 @@ type Entry = {
 
 const entries = new Map<Element, Entry>();
 let observer: IntersectionObserver | null = null;
+let keepObserver: IntersectionObserver | null = null;
 
 function distanceToViewport(el: Element) {
   const r = el.getBoundingClientRect();
@@ -44,7 +49,7 @@ function pump() {
   let loading = 0;
   for (const entry of entries.values()) {
     if (entry.state === "idle") continue;
-    if (entry.seen && !entry.near) {
+    if (entry.seen && (entry.state === "loading" ? !entry.near : !entry.keep)) {
       release(entry, "idle");
       entry.setLoad(false);
     } else if (entry.state === "loading") loading++;
@@ -100,19 +105,32 @@ function getObserver() {
     },
     { rootMargin: NEAR_MARGIN }
   );
+  keepObserver ??= new IntersectionObserver(
+    (records) => {
+      for (const r of records) {
+        const entry = entries.get(r.target);
+        // A card hidden by a filter has no size: keep its video, the filter will bring it back
+        if (entry) entry.keep = r.isIntersecting || r.boundingClientRect.height === 0;
+      }
+      pump();
+    },
+    { rootMargin: KEEP_MARGIN }
+  );
   return observer;
 }
 
 // `el` is the card (observing the card, not the video inside it)
 export function registerVideo(el: Element, setLoad: (load: boolean) => void) {
-  const entry: Entry = { setLoad, near: false, seen: false, state: "idle" };
+  const entry: Entry = { setLoad, near: false, keep: false, seen: false, state: "idle" };
   entries.set(el, entry);
   getObserver().observe(el);
+  keepObserver?.observe(el);
   return () => {
     const entry = entries.get(el);
     if (entry) clearTimeout(entry.timer);
     entries.delete(el);
     observer?.unobserve(el);
+    keepObserver?.unobserve(el);
     pump();
   };
 }

@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from "react";
 
 // AV1 main profile, level 4.0, 8-bit: browsers without an AV1 decoder skip to the H.264 source
 export const AV1_TYPE = 'video/mp4; codecs="av01.0.08M.08"';
+// HEVC main profile, level 5.0: Safari on Apple devices without an AV1 decoder takes this one,
+// about half the size of H.264 at the same quality. Browsers without HEVC skip to H.264.
+export const HEVC_TYPE = 'video/mp4; codecs="hvc1.1.6.L150.90"';
 
 // Where each clip last played, by clock id (the H.264 URL unless set): the lightbox continues
 // from the card's frame
@@ -16,6 +19,7 @@ type Props = {
   alt: string;
   h264: string;
   av1?: string;
+  hevc?: string;
   // Attach the sources (starts the download). Off again drops the video and frees its memory.
   load: boolean;
   play: boolean;
@@ -36,6 +40,7 @@ export default function LoopVideo({
   alt,
   h264,
   av1,
+  hevc,
   load,
   play,
   eager = false,
@@ -47,8 +52,7 @@ export default function LoopVideo({
 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
-  // Safari in Low Power Mode refuses every video, muted or not: it either rejects play() or
-  // reports "playing" and pauses at once at 0 s. The poster then stays.
+  // Safari in Low Power Mode refuses every video, muted or not. The poster then stays.
   const [refused, setRefused] = useState(false);
   const attached = useRef(eager);
   const synced = useRef(false);
@@ -90,9 +94,20 @@ export default function LoopVideo({
       video.pause();
       return;
     }
-    video.play().catch((err: DOMException) => {
-      if (err.name === "NotAllowedError") setRefused(true);
-    });
+    // Refused: play() is rejected, or (Safari in Low Power Mode) it resolves and the video still
+    // stands at 0 s a second later
+    let check: ReturnType<typeof setTimeout> | undefined;
+    video.play().then(
+      () => {
+        check = setTimeout(() => {
+          if (video.paused && video.currentTime === 0 && video.readyState > 0) setRefused(true);
+        }, 1000);
+      },
+      (err: DOMException) => {
+        if (err.name === "NotAllowedError") setRefused(true);
+      }
+    );
+    return () => clearTimeout(check);
   }, [play, load, refused, caughtUp]);
 
   // A refused video may start from a user gesture: retry on the first click or key press
@@ -151,11 +166,11 @@ export default function LoopVideo({
           setPlaying(true);
           onPlaying?.();
         }}
-        onPause={(e) => {
-          // Paused at 0 s although we asked it to play: the browser refused it
-          if (play && !playing && e.currentTarget.currentTime === 0) setRefused(true);
+        onEmptied={() => {
+          setPlaying(false);
+          // Attached again later: continue from where it was, not from the start
+          synced.current = false;
         }}
-        onEmptied={() => setPlaying(false)}
         // Start on the frame the other copy is on; a follower starts downloading 2.5 s ahead of it
         onLoadedMetadata={(e) => {
           if (!syncWith || synced.current) return;
@@ -165,6 +180,7 @@ export default function LoopVideo({
         }}
       >
         {av1 && <source src={load ? av1 : undefined} type={AV1_TYPE} />}
+        {hevc && <source src={load ? hevc : undefined} type={HEVC_TYPE} />}
         <source src={load ? h264 : undefined} type="video/mp4" />
       </video>
       {poster && (

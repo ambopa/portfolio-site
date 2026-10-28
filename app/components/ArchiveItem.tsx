@@ -139,6 +139,8 @@ export default function ArchiveItem({ item, onOpen, priority = false, shown = tr
             alt={item.label}
             h264={item.videoSrc}
             av1={item.videoAv1Src}
+            hevc={item.videoHevcSrc}
+            syncWith={item.videoSrc}
             load={videoLoad}
             play={visible}
             posterPriority={eager}

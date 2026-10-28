@@ -61,8 +61,10 @@ function sanityToItems(projects: SanityProject[]): ArchiveItemType[] {
         fullPoster: optimizeUrl(rawPoster, 2800),
         videoSrc: g.videoUrl || undefined,
         videoAv1Src: g.videoUrl ? g.videoAv1Url || undefined : undefined,
+        videoHevcSrc: g.videoUrl ? g.videoHevcUrl || undefined : undefined,
         videoHdSrc: g.videoUrl ? g.videoHdUrl || undefined : undefined,
         videoHdAv1Src: g.videoUrl ? g.videoHdAv1Url || undefined : undefined,
+        videoHdHevcSrc: g.videoUrl ? g.videoHdHevcUrl || undefined : undefined,
       });
     }
   }

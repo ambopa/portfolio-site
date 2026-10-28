@@ -19,8 +19,10 @@ export type ArchiveItemType = {
   fullSrc?: string;    // высокое разрешение для лайтбокса
   videoSrc?: string;
   videoAv1Src?: string;
+  videoHevcSrc?: string;
   videoHdSrc?: string;    // для лайтбокса
   videoHdAv1Src?: string;
+  videoHdHevcSrc?: string;
   poster?: string;
   fullPoster?: string;   // постер высокого разрешения для лайтбокса
 };
