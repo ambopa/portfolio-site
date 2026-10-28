@@ -52,6 +52,11 @@ export default function LoopVideo({
   const [refused, setRefused] = useState(false);
   const attached = useRef(eager);
   const synced = useRef(false);
+  // A copy taking over from another one (the HD video in the lightbox). It downloads a little
+  // ahead of where the other copy plays and starts only when that copy reaches that point: on a
+  // slow connection it could never catch up by playing from behind.
+  const follower = !!syncWith && syncWith !== h264 && syncWith !== clockId;
+  const [caughtUp, setCaughtUp] = useState(!follower);
 
   // Attach or detach the sources; <source> changes only take effect after load()
   useEffect(() => {
@@ -64,7 +69,23 @@ export default function LoopVideo({
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !load || refused) return;
+    if (!video || !syncWith || caughtUp) return;
+    const check = () => {
+      const target = clipTime(syncWith) + 0.05;
+      for (let i = 0; i < video.buffered.length; i++) {
+        if (video.buffered.start(i) <= target && target + 1 <= video.buffered.end(i)) {
+          video.currentTime = target;
+          setCaughtUp(true);
+        }
+      }
+    };
+    const timer = setInterval(check, 100);
+    return () => clearInterval(timer);
+  }, [syncWith, caughtUp]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !load || refused || !caughtUp) return;
     if (!play) {
       video.pause();
       return;
@@ -72,7 +93,7 @@ export default function LoopVideo({
     video.play().catch((err: DOMException) => {
       if (err.name === "NotAllowedError") setRefused(true);
     });
-  }, [play, load, refused]);
+  }, [play, load, refused, caughtUp]);
 
   // A refused video may start from a user gesture: retry on the first click or key press
   useEffect(() => {
@@ -108,7 +129,7 @@ export default function LoopVideo({
         muted
         loop
         playsInline
-        autoPlay={eager}
+        autoPlay={eager && !follower}
         preload={eager ? "auto" : "none"}
         // Shown only once time really moves: Safari can report "playing" for a video it never starts
         onTimeUpdate={(e) => {
@@ -117,7 +138,7 @@ export default function LoopVideo({
           if (playing || v.paused || v.currentTime === 0) return;
           // A copy that takes over from another one is shown only when it is on the same frame,
           // so the swap never jumps. Behind (it buffered): seek ahead once that part is downloaded.
-          if (syncWith && syncWith !== clockId && syncWith !== h264) {
+          if (follower && syncWith) {
             const target = clipTime(syncWith);
             if (Math.abs(target - v.currentTime) > 0.1) {
               const ahead = target + 0.1;
@@ -135,11 +156,12 @@ export default function LoopVideo({
           if (play && !playing && e.currentTarget.currentTime === 0) setRefused(true);
         }}
         onEmptied={() => setPlaying(false)}
-        // Start on the frame the other copy is on
+        // Start on the frame the other copy is on; a follower starts downloading 2.5 s ahead of it
         onLoadedMetadata={(e) => {
           if (!syncWith || synced.current) return;
           synced.current = true;
-          e.currentTarget.currentTime = clipTime(syncWith);
+          const v = e.currentTarget;
+          v.currentTime = follower ? (clipTime(syncWith) + 2.5) % v.duration : clipTime(syncWith);
         }}
       >
         {av1 && <source src={load ? av1 : undefined} type={AV1_TYPE} />}
