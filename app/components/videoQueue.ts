@@ -39,7 +39,11 @@ function start(video: HTMLVideoElement) {
 }
 
 export function queueVideo(video: HTMLVideoElement) {
-  if (video.preload === "auto") return;
+  if (video.preload === "auto") {
+    // First-row videos start from the HTML itself; count them while they still load
+    if (video.readyState < HTMLMediaElement.HAVE_ENOUGH_DATA) start(video);
+    return;
+  }
   waiting.add(video);
   pump();
 }

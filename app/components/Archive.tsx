@@ -264,7 +264,7 @@ export default function Archive({ sanityProjects, lang }: Props) {
                   key={item.id}
                   item={item}
                   onOpen={openLightbox}
-                  priority={colIdx === 0 && itemIdx === 0}
+                  priority={itemIdx === 0}
                 />
               ))}
             </div>

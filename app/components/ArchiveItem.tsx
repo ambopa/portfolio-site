@@ -158,6 +158,7 @@ export default function ArchiveItem({ item, onOpen, priority = false }: Props) {
                 width={item.aspectW}
                 height={item.aspectH}
                 loading={priority ? "eager" : "lazy"}
+                fetchPriority={priority ? "high" : "auto"}
                 decoding="async"
                 onLoad={handleImageLoad}
               />
@@ -170,6 +171,8 @@ export default function ArchiveItem({ item, onOpen, priority = false }: Props) {
                 muted
                 loop
                 playsInline
+                // first row plays straight from the HTML, without waiting for JS
+                autoPlay={priority}
                 preload={priority ? "auto" : "none"}
                 onCanPlay={handleVideoCanPlay}
               >
