@@ -33,7 +33,8 @@ export default function LoopVideo({
 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
-  // Safari in Low Power Mode refuses every video, muted or not. The poster then stays.
+  // Safari in Low Power Mode refuses every video, muted or not: it either rejects play() or
+  // reports "playing" and pauses at once at 0 s. The poster then stays.
   const [refused, setRefused] = useState(false);
   const attached = useRef(eager);
 
@@ -58,6 +59,26 @@ export default function LoopVideo({
     });
   }, [play, load, refused]);
 
+  // A refused video may start from a user gesture: retry on the first click or key press
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !refused) return;
+    const retry = () => {
+      video.style.visibility = "visible";
+      video.play().then(
+        () => setRefused(false),
+        () => (video.style.visibility = "")
+      );
+    };
+    const opts = { once: true, capture: true } as const;
+    document.addEventListener("pointerdown", retry, opts);
+    document.addEventListener("keydown", retry, opts);
+    return () => {
+      document.removeEventListener("pointerdown", retry, opts);
+      document.removeEventListener("keydown", retry, opts);
+    };
+  }, [refused]);
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !onBuffered) return;
@@ -68,18 +89,26 @@ export default function LoopVideo({
 
   return (
     <>
-      {/* Hidden until it plays: a video that cannot start yet shows nothing, not Safari's play button */}
+      {/* Transparent until it plays, fully hidden when refused: Safari draws its play button over a
+          refused video, and that button must never show */}
       <video
         ref={videoRef}
-        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${playing ? "opacity-100" : "opacity-0"}`}
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${playing ? "opacity-100" : "opacity-0"} ${refused ? "invisible" : ""}`}
         muted
         loop
         playsInline
         autoPlay={eager}
         preload={eager ? "auto" : "none"}
-        onPlaying={() => {
+        // Shown only once time really moves: Safari can report "playing" for a video it never starts
+        onTimeUpdate={(e) => {
+          const v = e.currentTarget;
+          if (playing || v.paused || v.currentTime === 0) return;
           setPlaying(true);
           onPlaying?.();
+        }}
+        onPause={(e) => {
+          // Paused at 0 s although we asked it to play: the browser refused it
+          if (play && !playing && e.currentTarget.currentTime === 0) setRefused(true);
         }}
         onEmptied={() => setPlaying(false)}
       >
