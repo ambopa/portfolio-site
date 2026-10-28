@@ -36,7 +36,11 @@ function release(entry: Entry, state: Entry["state"]) {
   entry.state = state;
 }
 
+// Images first: until the page has loaded its pictures, videos would only slow them down
+let pageLoaded = false;
+
 function pump() {
+  if (!pageLoaded) return;
   let loading = 0;
   for (const entry of entries.values()) {
     if (entry.state === "idle") continue;
@@ -72,6 +76,18 @@ function pump() {
 }
 
 function getObserver() {
+  if (!observer) {
+    if (document.readyState === "complete") pageLoaded = true;
+    else
+      window.addEventListener(
+        "load",
+        () => {
+          pageLoaded = true;
+          pump();
+        },
+        { once: true }
+      );
+  }
   observer ??= new IntersectionObserver(
     (records) => {
       for (const r of records) {
@@ -87,11 +103,9 @@ function getObserver() {
   return observer;
 }
 
-// `el` is the card (observing the card, not the video: content-visibility can skip the inside).
-// `downloading` is true for first-row videos whose sources are already in the HTML.
-export function registerVideo(el: Element, setLoad: (load: boolean) => void, downloading: boolean) {
-  const entry: Entry = { setLoad, near: false, seen: false, state: downloading ? "loading" : "idle" };
-  if (downloading) entry.timer = setTimeout(() => videoBuffered(el), SLOT_MS);
+// `el` is the card (observing the card, not the video inside it)
+export function registerVideo(el: Element, setLoad: (load: boolean) => void) {
+  const entry: Entry = { setLoad, near: false, seen: false, state: "idle" };
   entries.set(el, entry);
   getObserver().observe(el);
   return () => {

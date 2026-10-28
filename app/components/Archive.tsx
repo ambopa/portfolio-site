@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useCallback, useMemo, useEffect, useLayoutEffect, useRef } from "react";
+import { useState, useCallback, useMemo, useEffect, useLayoutEffect, useRef, type CSSProperties } from "react";
 import ReactMarkdown from "react-markdown";
 import ArchiveItem from "./ArchiveItem";
 import Lightbox from "./Lightbox";
-import { PROJECTS, archiveItems as staticItems, type ArchiveItemType, type Project } from "@/app/data/items";
+import { PROJECTS, archiveItems as staticItems, type ArchiveItemType } from "@/app/data/items";
 import type { SanityProject } from "@/sanity/lib/queries";
 import { i18n, type Lang } from "@/app/i18n";
 
@@ -121,6 +121,7 @@ export default function Archive({ sanityProjects, lang }: Props) {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [lightboxItem, setLightboxItem] = useState<ArchiveItemType | null>(null);
   const [descriptionRatioHeight, setDescriptionRatioHeight] = useState(0);
+  const [descriptionHeight, setDescriptionHeight] = useState(0);
   const descriptionWrapperRef = useRef<HTMLDivElement>(null);
   const gridContainerRef = useRef<HTMLDivElement>(null);
 
@@ -151,6 +152,9 @@ export default function Archive({ sanityProjects, lang }: Props) {
     return PROJECTS.map((t) => ({ title: t }));
   }, [sanityProjects]);
 
+  // The cards on screen as the page loads: their media starts from the HTML
+  const [firstRow] = useState(() => new Set(allItems.slice(0, columns).map((i) => i.id)));
+
   const filteredItems = useMemo(
     () => (activeFilter ? allItems.filter((i) => i.project === activeFilter) : allItems),
     [activeFilter, allItems]
@@ -171,20 +175,41 @@ export default function Archive({ sanityProjects, lang }: Props) {
     if (idx < filteredItems.length - 1) setLightboxItem(filteredItems[idx + 1]);
   }, [lightboxItem, filteredItems]);
 
-  const columnArrays: ArchiveItemType[][] = Array.from({ length: columns }, () => []);
-  const columnHeights = Array.from({ length: columns }, () => 0);
-  if (!isMobile && descriptionRatioHeight > 0) {
-    columnHeights[0] = descriptionRatioHeight;
-  }
-  filteredItems.forEach((item) => {
-    const shortest = columnHeights.indexOf(Math.min(...columnHeights));
-    columnArrays[shortest].push(item);
-    columnHeights[shortest] += item.aspectH / item.aspectW;
-  });
-
   const activeProject = activeFilter
     ? (sanityProjects ?? []).find((p) => p.title === activeFilter)
     : null;
+
+  // Masonry: each card goes to the shortest column. Every card lives in one container and is only
+  // placed there, so a filter or column change moves cards instead of re-creating them (and their
+  // already downloaded images and videos). Sizes are in container units: right from the first paint.
+  const GAP = 12;
+  const colW = `((100cqw - ${(columns - 1) * GAP}px) / ${columns})`;
+  const showDescription = !isMobile && !!activeProject?.description;
+  const descOffset = showDescription && descriptionHeight > 0 ? descriptionHeight + GAP : 0;
+  const columnRatios = Array.from({ length: columns }, () => 0);
+  const columnCounts = Array.from({ length: columns }, () => 0);
+  if (showDescription && descriptionRatioHeight > 0) columnRatios[0] = descriptionRatioHeight;
+  const placed = new Map<number, CSSProperties>();
+  filteredItems.forEach((item) => {
+    const col = columnRatios.indexOf(Math.min(...columnRatios));
+    const above = col === 0 ? columnRatios[0] - (showDescription ? descriptionRatioHeight : 0) : columnRatios[col];
+    placed.set(item.id, {
+      position: "absolute",
+      width: `calc(${colW})`,
+      left: `calc(${col} * (${colW} + ${GAP}px))`,
+      top: `calc(${above} * ${colW} + ${columnCounts[col] * GAP + (col === 0 ? descOffset : 0)}px)`,
+    });
+    columnRatios[col] += item.aspectH / item.aspectW;
+    columnCounts[col] += 1;
+  });
+  const gridHeight = `max(${columnRatios
+    .map((r, col) => {
+      const ratio = col === 0 && showDescription ? r - descriptionRatioHeight : r;
+      const px = Math.max(columnCounts[col] - 1, 0) * GAP + (col === 0 ? descOffset : 0);
+      return `calc(${ratio} * ${colW} + ${px}px)`;
+    })
+    .join(", ")})`;
+
 
   useLayoutEffect(() => {
     if (!isMobile && activeProject?.description && descriptionWrapperRef.current && gridContainerRef.current) {
@@ -192,8 +217,10 @@ export default function Archive({ sanityProjects, lang }: Props) {
       const containerW = gridContainerRef.current.offsetWidth;
       const colW = (containerW - (columns - 1) * 12) / columns;
       setDescriptionRatioHeight(h / colW);
+      setDescriptionHeight(h);
     } else {
       setDescriptionRatioHeight(0);
+      setDescriptionHeight(0);
     }
   }, [isMobile, activeProject, columns]);
 
@@ -251,24 +278,28 @@ export default function Archive({ sanityProjects, lang }: Props) {
         )}
 
         {/* Сетка */}
-        <div ref={gridContainerRef} className="flex gap-3">
-          {columnArrays.map((col, colIdx) => (
-            <div key={colIdx} className="min-w-0 flex-1">
-              {colIdx === 0 && !isMobile && activeProject?.description && (
-                <div ref={descriptionWrapperRef}>
-                  <DescriptionCard project={activeProject} lang={lang} />
-                </div>
-              )}
-              {col.map((item, itemIdx) => (
-                <ArchiveItem
-                  key={item.id}
-                  item={item}
-                  onOpen={openLightbox}
-                  priority={itemIdx === 0}
-                />
-              ))}
-            </div>
-          ))}
+        <div ref={gridContainerRef} style={{ containerType: "inline-size" }}>
+          <div className="relative" style={{ height: gridHeight }}>
+            {showDescription && activeProject && (
+              <div
+                ref={descriptionWrapperRef}
+                className="absolute top-0 left-0"
+                style={{ width: `calc(${colW})` }}
+              >
+                <DescriptionCard project={activeProject} lang={lang} />
+              </div>
+            )}
+            {allItems.map((item) => (
+              <ArchiveItem
+                key={item.id}
+                item={item}
+                onOpen={openLightbox}
+                priority={firstRow.has(item.id)}
+                shown={placed.has(item.id)}
+                style={placed.get(item.id)}
+              />
+            ))}
+          </div>
         </div>
 
         {filteredItems.length === 0 && (

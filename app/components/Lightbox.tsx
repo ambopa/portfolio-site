@@ -2,12 +2,14 @@
 
 import { useEffect, useRef, useCallback, useState } from "react";
 import type { ArchiveItemType } from "@/app/data/items";
-import LoopVideo from "./LoopVideo";
+import LoopVideo, { clipTime } from "./LoopVideo";
 
-// Opens instantly with the grid's video (already downloaded), and swaps in the HD one
-// as soon as it plays. Both stay under the poster until they really play.
+// Continues the card's video from the frame it was on (the file is already downloaded), then
+// swaps in the HD copy at the same moment: the visitor only sees the picture get sharper.
+// The poster is only for a card that never played (Low Power Mode, or opened before it started).
 function LightboxVideo({ item }: { item: ArchiveItemType }) {
   const [hdPlaying, setHdPlaying] = useState(false);
+  const [cardPlayed] = useState(() => clipTime(item.videoSrc!) > 0);
   return (
     <div
       className="relative overflow-hidden rounded-[12px] bg-[#0b0b0c] shadow-2xl"
@@ -24,18 +26,21 @@ function LightboxVideo({ item }: { item: ArchiveItemType }) {
           load
           play
           eager
+          syncWith={`lightbox:${item.videoSrc}`}
           onPlaying={() => setHdPlaying(true)}
         />
       )}
       <div className={`absolute inset-0 transition-opacity duration-300 ${hdPlaying ? "opacity-0" : "opacity-100"}`}>
         <LoopVideo
-          poster={item.poster}
+          poster={cardPlayed ? undefined : item.poster}
           alt={item.label}
           h264={item.videoSrc!}
           av1={item.videoAv1Src}
           load
           play
           eager
+          clockId={`lightbox:${item.videoSrc}`}
+          syncWith={item.videoSrc}
         />
       </div>
     </div>

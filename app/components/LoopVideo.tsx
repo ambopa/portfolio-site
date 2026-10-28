@@ -5,6 +5,11 @@ import { useEffect, useRef, useState } from "react";
 // AV1 main profile, level 4.0, 8-bit: browsers without an AV1 decoder skip to the H.264 source
 export const AV1_TYPE = 'video/mp4; codecs="av01.0.08M.08"';
 
+// Where each clip last played, by clock id (the H.264 URL unless set): the lightbox continues
+// from the card's frame
+const clock = new Map<string, number>();
+export const clipTime = (src: string) => clock.get(src) ?? 0;
+
 type Props = {
   // First frame of the video, shown until the video is really playing
   poster?: string;
@@ -16,6 +21,12 @@ type Props = {
   play: boolean;
   // Sources are in the server HTML, so the download starts before any JS runs
   eager?: boolean;
+  // The poster is on screen as the page loads: fetch it first
+  posterPriority?: boolean;
+  // Clock this video reports its time to (default: its H.264 URL)
+  clockId?: string;
+  // Clock to start from and, for a copy taking over from another, to match before showing
+  syncWith?: string;
   onPlaying?: () => void;
   onBuffered?: () => void;
 };
@@ -28,6 +39,9 @@ export default function LoopVideo({
   load,
   play,
   eager = false,
+  posterPriority = eager,
+  clockId = h264,
+  syncWith,
   onPlaying,
   onBuffered,
 }: Props) {
@@ -37,6 +51,7 @@ export default function LoopVideo({
   // reports "playing" and pauses at once at 0 s. The poster then stays.
   const [refused, setRefused] = useState(false);
   const attached = useRef(eager);
+  const synced = useRef(false);
 
   // Attach or detach the sources; <source> changes only take effect after load()
   useEffect(() => {
@@ -64,11 +79,7 @@ export default function LoopVideo({
     const video = videoRef.current;
     if (!video || !refused) return;
     const retry = () => {
-      video.style.visibility = "visible";
-      video.play().then(
-        () => setRefused(false),
-        () => (video.style.visibility = "")
-      );
+      video.play().then(() => setRefused(false), () => {});
     };
     const opts = { once: true, capture: true } as const;
     document.addEventListener("pointerdown", retry, opts);
@@ -89,11 +100,11 @@ export default function LoopVideo({
 
   return (
     <>
-      {/* Transparent until it plays, fully hidden when refused: Safari draws its play button over a
-          refused video, and that button must never show */}
+      {/* Transparent until it plays: a video that cannot start shows neither an empty frame nor
+          Safari's play button. Opacity only: toggling visibility makes Safari draw the video shifted. */}
       <video
         ref={videoRef}
-        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${playing ? "opacity-100" : "opacity-0"} ${refused ? "invisible" : ""}`}
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${playing ? "opacity-100" : "opacity-0"}`}
         muted
         loop
         playsInline
@@ -102,7 +113,20 @@ export default function LoopVideo({
         // Shown only once time really moves: Safari can report "playing" for a video it never starts
         onTimeUpdate={(e) => {
           const v = e.currentTarget;
+          if (!v.paused) clock.set(clockId, v.currentTime);
           if (playing || v.paused || v.currentTime === 0) return;
+          // A copy that takes over from another one is shown only when it is on the same frame,
+          // so the swap never jumps. Behind (it buffered): seek ahead once that part is downloaded.
+          if (syncWith && syncWith !== clockId && syncWith !== h264) {
+            const target = clipTime(syncWith);
+            if (Math.abs(target - v.currentTime) > 0.1) {
+              const ahead = target + 0.1;
+              for (let i = 0; i < v.buffered.length; i++) {
+                if (v.buffered.start(i) <= ahead && ahead + 0.5 <= v.buffered.end(i)) v.currentTime = ahead;
+              }
+              return;
+            }
+          }
           setPlaying(true);
           onPlaying?.();
         }}
@@ -111,6 +135,12 @@ export default function LoopVideo({
           if (play && !playing && e.currentTarget.currentTime === 0) setRefused(true);
         }}
         onEmptied={() => setPlaying(false)}
+        // Start on the frame the other copy is on
+        onLoadedMetadata={(e) => {
+          if (!syncWith || synced.current) return;
+          synced.current = true;
+          e.currentTarget.currentTime = clipTime(syncWith);
+        }}
       >
         {av1 && <source src={load ? av1 : undefined} type={AV1_TYPE} />}
         <source src={load ? h264 : undefined} type="video/mp4" />
@@ -121,8 +151,8 @@ export default function LoopVideo({
           src={poster}
           alt={alt}
           decoding="async"
-          fetchPriority={eager ? "high" : "auto"}
-          loading={eager ? "eager" : "lazy"}
+          fetchPriority={posterPriority ? "high" : "auto"}
+          loading={posterPriority ? "eager" : "lazy"}
         />
       )}
     </>
