@@ -1,8 +1,47 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import type { ArchiveItemType } from "@/app/data/items";
-import { AV1_TYPE } from "./ArchiveItem";
+import LoopVideo from "./LoopVideo";
+
+// Opens instantly with the grid's video (already downloaded), and swaps in the HD one
+// as soon as it plays. Both stay under the poster until they really play.
+function LightboxVideo({ item }: { item: ArchiveItemType }) {
+  const [hdPlaying, setHdPlaying] = useState(false);
+  return (
+    <div
+      className="relative overflow-hidden rounded-[12px] bg-[#0b0b0c] shadow-2xl"
+      style={{
+        aspectRatio: `${item.aspectW} / ${item.aspectH}`,
+        width: `min(90vw, calc(85vh * ${item.aspectW} / ${item.aspectH}))`,
+      }}
+    >
+      {item.videoHdSrc && (
+        <LoopVideo
+          alt=""
+          h264={item.videoHdSrc}
+          av1={item.videoHdAv1Src}
+          load
+          play
+          eager
+          imageFallback={false}
+          onPlaying={() => setHdPlaying(true)}
+        />
+      )}
+      <div className={`absolute inset-0 transition-opacity duration-300 ${hdPlaying ? "opacity-0" : "opacity-100"}`}>
+        <LoopVideo
+          poster={item.poster}
+          alt={item.label}
+          h264={item.videoSrc!}
+          av1={item.videoAv1Src}
+          load
+          play
+          eager
+        />
+      </div>
+    </div>
+  );
+}
 
 type Props = {
   item: ArchiveItemType | null;
@@ -14,7 +53,6 @@ type Props = {
 
 export default function Lightbox({ item, items, onClose, onPrev, onNext }: Props) {
   const overlayRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   // Lock scroll while open
   useEffect(() => {
@@ -36,17 +74,6 @@ export default function Lightbox({ item, items, onClose, onPrev, onNext }: Props
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [item, onClose, onPrev, onNext]);
-
-  // Play video when opened
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    if (item?.videoSrc) {
-      video.play().catch(() => {});
-    } else {
-      video.pause();
-    }
-  }, [item]);
 
   const handleOverlayClick = useCallback(
     (e: React.MouseEvent) => {
@@ -112,27 +139,7 @@ export default function Lightbox({ item, items, onClose, onPrev, onNext }: Props
       {/* Media */}
       <div className="relative max-w-[90vw] max-h-[85vh] flex items-center justify-center">
         {hasVideo ? (
-          <video
-            ref={videoRef}
-            key={item.id}
-            className="rounded-[12px] shadow-2xl"
-            poster={item.fullPoster || item.poster}
-            muted
-            loop
-            playsInline
-            controls={false}
-            preload="auto"
-            style={{
-              aspectRatio: `${item.aspectW} / ${item.aspectH}`,
-              // a video element sizes to its own resolution; fit it to the viewport instead
-              width: `min(90vw, calc(85vh * ${item.aspectW} / ${item.aspectH}))`,
-            }}
-          >
-            {item.videoHdAv1Src && <source src={item.videoHdAv1Src} type={AV1_TYPE} />}
-            {item.videoHdSrc && <source src={item.videoHdSrc} type="video/mp4" />}
-            {item.videoAv1Src && <source src={item.videoAv1Src} type={AV1_TYPE} />}
-            <source src={item.videoSrc} type="video/mp4" />
-          </video>
+          <LightboxVideo key={item.id} item={item} />
         ) : (item.fullSrc || item.imageSrc) ? (
           <img
             key={item.id}

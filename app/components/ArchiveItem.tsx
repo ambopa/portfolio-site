@@ -2,10 +2,8 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { ArchiveItemType } from "@/app/data/items";
-import { queueVideo, unqueueVideo } from "./videoQueue";
-
-// AV1 main profile, level 4.0, 8-bit: browsers without an AV1 decoder skip to the H.264 source
-export const AV1_TYPE = 'video/mp4; codecs="av01.0.08M.08"';
+import LoopVideo from "./LoopVideo";
+import { registerVideo, videoBuffered } from "./videoQueue";
 
 type Props = {
   item: ArchiveItemType;
@@ -16,26 +14,19 @@ type Props = {
 export default function ArchiveItem({ item, onOpen, priority = false }: Props) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [videoLoad, setVideoLoad] = useState(priority);
+  const [visible, setVisible] = useState(false);
 
-  // Scroll-based reveal animation
+  // Scroll-based reveal animation. The first row is on screen at once and stays put:
+  // fading it out and back in on hydration only makes the page look unfinished.
   useEffect(() => {
     const el = buttonRef.current;
-    if (!el) return;
+    if (!el || priority) return;
 
     el.style.opacity = "0";
     el.style.transform = "translateY(20px)";
     el.style.transition = "opacity 0.7s var(--ease-quint), transform 0.7s var(--ease-quint)";
-
-    if (priority) {
-      // First few items animate immediately
-      const timer = setTimeout(() => {
-        el.style.opacity = "1";
-        el.style.transform = "translateY(0)";
-      }, 100);
-      return () => clearTimeout(timer);
-    }
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -54,48 +45,25 @@ export default function ArchiveItem({ item, onOpen, priority = false }: Props) {
     return () => observer.disconnect();
   }, [priority]);
 
-  // Video: queue its download shortly before it scrolls into view, play only while visible.
-  // play() would start the download itself, so it waits until the queue has started it.
+  // Video: the queue decides when it downloads; it plays only while on screen
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video || !item.videoSrc) return;
-    let visible = false;
-
-    const preloader = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          queueVideo(video);
-          preloader.disconnect();
-        }
-      },
-      { rootMargin: "600px 0px" }
-    );
-    preloader.observe(video);
-
+    const el = buttonRef.current;
+    if (!el || !item.videoSrc) return;
+    const unregister = registerVideo(el, setVideoLoad, priority);
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          visible = entry.isIntersecting;
-          if (!visible) video.pause();
-          else if (video.preload === "auto") video.play().catch(() => {});
-        });
-      },
-      { threshold: 0.3 }
+      (entries) => entries.forEach((entry) => setVisible(entry.isIntersecting)),
+      { threshold: 0.25 }
     );
-    observer.observe(video);
-
-    const playIfVisible = () => {
-      if (visible) video.play().catch(() => {});
-    };
-    video.addEventListener("canplay", playIfVisible);
-
+    observer.observe(el);
     return () => {
-      preloader.disconnect();
+      unregister();
       observer.disconnect();
-      unqueueVideo(video);
-      video.removeEventListener("canplay", playIfVisible);
     };
-  }, [item.videoSrc]);
+  }, [item.videoSrc, priority]);
+
+  const handleBuffered = useCallback(() => {
+    if (buttonRef.current) videoBuffered(buttonRef.current);
+  }, []);
 
   const handleImageLoad = useCallback(() => {
     setImgLoaded(true);
@@ -106,9 +74,7 @@ export default function ArchiveItem({ item, onOpen, priority = false }: Props) {
     if (imgRef.current?.complete) setImgLoaded(true);
   }, []);
 
-  const hasMedia = item.imageSrc || item.videoSrc || item.poster;
-  const estimatedHeight =
-    Math.round((item.aspectH / item.aspectW) * 360);
+  const estimatedHeight = Math.round((item.aspectH / item.aspectW) * 360);
 
   return (
     <button
@@ -136,46 +102,23 @@ export default function ArchiveItem({ item, onOpen, priority = false }: Props) {
             width={item.aspectW}
             height={item.aspectH}
             loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
             decoding="async"
             onLoad={handleImageLoad}
           />
         )}
 
-        {/* Video with poster */}
-        {(item.videoSrc || item.poster) && (
-          <>
-            {item.poster && (
-              <img
-                ref={imgRef}
-                className={`block w-full transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
-                src={item.poster}
-                alt={item.label}
-                width={item.aspectW}
-                height={item.aspectH}
-                loading={priority ? "eager" : "lazy"}
-                fetchPriority={priority ? "high" : "auto"}
-                decoding="async"
-                onLoad={handleImageLoad}
-              />
-            )}
-            {item.videoSrc && (
-              <video
-                ref={videoRef}
-                // stays visible: Safari refuses to autoplay a hidden video, and the poster is its first frame anyway
-                className="absolute inset-0 h-full w-full object-cover"
-                poster={item.poster}
-                muted
-                loop
-                playsInline
-                // first row plays straight from the HTML, without waiting for JS
-                autoPlay={priority}
-                preload={priority ? "auto" : "none"}
-              >
-                {item.videoAv1Src && <source src={item.videoAv1Src} type={AV1_TYPE} />}
-                <source src={item.videoSrc} type="video/mp4" />
-              </video>
-            )}
-          </>
+        {item.videoSrc && (
+          <LoopVideo
+            poster={item.poster}
+            alt={item.label}
+            h264={item.videoSrc}
+            av1={item.videoAv1Src}
+            load={videoLoad}
+            play={visible}
+            eager={priority}
+            onBuffered={handleBuffered}
+          />
         )}
       </div>
     </button>
