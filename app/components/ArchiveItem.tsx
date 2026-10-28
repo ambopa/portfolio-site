@@ -89,8 +89,12 @@ export default function ArchiveItem({ item, onOpen, priority = false }: Props) {
       }}
     >
       <div
-        className="relative w-full overflow-hidden rounded-[12px] bg-black/[0.03]"
-        style={{ aspectRatio: `${item.aspectW} / ${item.aspectH}` }}
+        className="relative w-full overflow-hidden rounded-[12px] bg-black/[0.03] bg-cover bg-center"
+        style={{
+          aspectRatio: `${item.aspectW} / ${item.aspectH}`,
+          // blurred preview inlined in the HTML: the card is never an empty box while the image loads
+          backgroundImage: item.placeholder ? `url(${item.placeholder})` : undefined,
+        }}
       >
         {/* Static image */}
         {item.imageSrc && (

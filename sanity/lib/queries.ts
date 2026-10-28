@@ -16,6 +16,7 @@ export const projectsQuery = groq`
       "url": image.asset->url,
       "width": image.asset->metadata.dimensions.width,
       "height": image.asset->metadata.dimensions.height,
+      "lqip": image.asset->metadata.lqip,
       caption,
       videoUrl,
       videoAv1Url,
@@ -30,6 +31,7 @@ export type SanityGalleryItem = {
   width: number;
   height: number;
   caption?: string;
+  lqip?: string;
   videoUrl?: string;
   videoAv1Url?: string;
   videoHdUrl?: string;
