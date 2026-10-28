@@ -18,6 +18,7 @@ export type ArchiveItemType = {
   imageSrc?: string;   // оптимизированная для сетки
   fullSrc?: string;    // высокое разрешение для лайтбокса
   videoSrc?: string;
+  videoAv1Src?: string;
   poster?: string;
 };
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import type { ArchiveItemType } from "@/app/data/items";
+import { AV1_TYPE } from "./ArchiveItem";
 
 type Props = {
   item: ArchiveItemType | null;
@@ -122,7 +123,8 @@ export default function Lightbox({ item, items, onClose, onPrev, onNext }: Props
             controls={false}
             style={{ aspectRatio: `${item.aspectW} / ${item.aspectH}` }}
           >
-            <source src={item.videoSrc} />
+            {item.videoAv1Src && <source src={item.videoAv1Src} type={AV1_TYPE} />}
+            <source src={item.videoSrc} type="video/mp4" />
           </video>
         ) : (item.fullSrc || item.imageSrc) ? (
           <img

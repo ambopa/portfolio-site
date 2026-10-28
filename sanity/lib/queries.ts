@@ -18,6 +18,7 @@ export const projectsQuery = groq`
       "height": image.asset->metadata.dimensions.height,
       caption,
       videoUrl,
+      videoAv1Url,
     },
   }
 `;
@@ -28,6 +29,7 @@ export type SanityGalleryItem = {
   height: number;
   caption?: string;
   videoUrl?: string;
+  videoAv1Url?: string;
 };
 
 export type SanityProject = {

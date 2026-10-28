@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { ArchiveItemType } from "@/app/data/items";
 
+// AV1 main profile, level 4.0, 8-bit: browsers without an AV1 decoder skip to the H.264 source
+export const AV1_TYPE = 'video/mp4; codecs="av01.0.08M.08"';
+
 type Props = {
   item: ArchiveItemType;
   onOpen: (item: ArchiveItemType) => void;
@@ -51,10 +54,21 @@ export default function ArchiveItem({ item, onOpen, priority = false }: Props) {
     return () => observer.disconnect();
   }, [priority]);
 
-  // Video play/pause on intersection
+  // Video: start buffering shortly before it scrolls into view, play only while visible
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !item.videoSrc) return;
+
+    const preloader = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          video.preload = "auto";
+          preloader.disconnect();
+        }
+      },
+      { rootMargin: "600px 0px" }
+    );
+    preloader.observe(video);
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -70,7 +84,10 @@ export default function ArchiveItem({ item, onOpen, priority = false }: Props) {
     );
 
     observer.observe(video);
-    return () => observer.disconnect();
+    return () => {
+      preloader.disconnect();
+      observer.disconnect();
+    };
   }, [item.videoSrc]);
 
   const handleImageLoad = useCallback(() => {
@@ -126,6 +143,7 @@ export default function ArchiveItem({ item, onOpen, priority = false }: Props) {
           <>
             {item.poster && (
               <img
+                ref={imgRef}
                 className={`block w-full transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
                 src={item.poster}
                 alt={item.label}
@@ -144,10 +162,11 @@ export default function ArchiveItem({ item, onOpen, priority = false }: Props) {
                 muted
                 loop
                 playsInline
-                preload="none"
+                preload={priority ? "auto" : "none"}
                 onCanPlay={handleVideoCanPlay}
               >
-                <source src={item.videoSrc} />
+                {item.videoAv1Src && <source src={item.videoAv1Src} type={AV1_TYPE} />}
+                <source src={item.videoSrc} type="video/mp4" />
               </video>
             )}
           </>

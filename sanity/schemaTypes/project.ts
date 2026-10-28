@@ -70,6 +70,12 @@ export const project = defineType({
               type: "url",
               description: "Опционально — если вместо изображения нужно видео",
             }),
+            defineField({
+              name: "videoAv1Url",
+              title: "Видео AV1 (MP4)",
+              type: "url",
+              description: "Опционально — та же анимация в AV1: легче, браузер возьмёт её, если умеет",
+            }),
           ],
           preview: {
             select: { title: "caption", media: "image" },
