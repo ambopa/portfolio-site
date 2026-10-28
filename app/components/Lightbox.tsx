@@ -24,7 +24,6 @@ function LightboxVideo({ item }: { item: ArchiveItemType }) {
           load
           play
           eager
-          imageFallback={false}
           onPlaying={() => setHdPlaying(true)}
         />
       )}

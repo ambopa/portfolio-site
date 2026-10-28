@@ -37,7 +37,7 @@ function GridIcon5() {
 
 function optimizeUrl(url: string | undefined, width: number): string | undefined {
   if (!url || !url.includes("cdn.sanity.io")) return url;
-  return `${url}?w=${width}&auto=format&q=82&fit=max`;
+  return `${url}?w=${width}&auto=format&q=${width > 1500 ? 82 : 70}&fit=max`;
 }
 
 // Convert Sanity projects to flat ArchiveItemType list
@@ -55,11 +55,10 @@ function sanityToItems(projects: SanityProject[]): ArchiveItemType[] {
         project: p.title,
         aspectW: g.width || 1920,
         aspectH: g.height || 1080,
-        imageSrc: optimizeUrl(rawUrl, 1200),
+        imageSrc: optimizeUrl(rawUrl, 1000),
         fullSrc: optimizeUrl(rawUrl, 2800),
-        poster: optimizeUrl(rawPoster, 1200),
+        poster: optimizeUrl(rawPoster, 1000),
         fullPoster: optimizeUrl(rawPoster, 2800),
-        placeholder: g.lqip,
         videoSrc: g.videoUrl || undefined,
         videoAv1Src: g.videoUrl ? g.videoAv1Url || undefined : undefined,
         videoHdSrc: g.videoUrl ? g.videoHdUrl || undefined : undefined,

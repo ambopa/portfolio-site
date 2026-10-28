@@ -74,8 +74,6 @@ export default function ArchiveItem({ item, onOpen, priority = false }: Props) {
     if (imgRef.current?.complete) setImgLoaded(true);
   }, []);
 
-  const estimatedHeight = Math.round((item.aspectH / item.aspectW) * 360);
-
   return (
     <button
       ref={buttonRef}
@@ -83,18 +81,11 @@ export default function ArchiveItem({ item, onOpen, priority = false }: Props) {
       onClick={() => onOpen(item)}
       aria-label={item.label}
       className="mb-3 block w-full cursor-pointer rounded-[12px] text-left outline-none focus-visible:ring-1 focus-visible:ring-black/30"
-      style={{
-        contentVisibility: "auto",
-        containIntrinsicSize: `auto ${estimatedHeight}px`,
-      }}
     >
       <div
-        className="relative w-full overflow-hidden rounded-[12px] bg-black/[0.03] bg-cover bg-center"
-        style={{
-          aspectRatio: `${item.aspectW} / ${item.aspectH}`,
-          // blurred preview inlined in the HTML: the card is never an empty box while the image loads
-          backgroundImage: item.placeholder ? `url(${item.placeholder})` : undefined,
-        }}
+        // The shots are all on a near-black stage: a card that is still loading looks like one, not like a hole
+        className="relative w-full overflow-hidden rounded-[12px] bg-[#0b0b0c]"
+        style={{ aspectRatio: `${item.aspectW} / ${item.aspectH}` }}
       >
         {/* Static image */}
         {item.imageSrc && (

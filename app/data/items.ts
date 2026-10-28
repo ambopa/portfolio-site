@@ -22,7 +22,6 @@ export type ArchiveItemType = {
   videoHdSrc?: string;    // для лайтбокса
   videoHdAv1Src?: string;
   poster?: string;
-  placeholder?: string; // крошечное размытое превью, встроено в HTML
   fullPoster?: string;   // постер высокого разрешения для лайтбокса
 };
 

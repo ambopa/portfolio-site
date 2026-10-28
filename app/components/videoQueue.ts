@@ -3,7 +3,9 @@
 // On a slow connection every video downloading at once shares the bandwidth and all of them
 // start late, so only a few load at a time. The order is by distance to what is on screen now,
 // not by position on the page: a visitor who scrolls fast gets the cards in front of them first.
-// A video that left the area around the screen before it finished is cancelled to free the line.
+// A video that left the area around the screen is dropped: an unfinished download is cancelled to
+// free the line, a finished one gives its decoder memory back (Safari reloads a page that keeps
+// a dozen decoded videos). Coming back costs nothing: the file is still in the HTTP cache.
 
 const MAX_LOADING = 3;
 // A slow file stops holding a slot after this long; it keeps downloading in the background
@@ -37,11 +39,11 @@ function release(entry: Entry, state: Entry["state"]) {
 function pump() {
   let loading = 0;
   for (const entry of entries.values()) {
-    if (entry.state !== "loading") continue;
+    if (entry.state === "idle") continue;
     if (entry.seen && !entry.near) {
       release(entry, "idle");
       entry.setLoad(false);
-    } else loading++;
+    } else if (entry.state === "loading") loading++;
   }
   const waiting = [...entries]
     .filter(([, e]) => e.state === "idle" && e.near)

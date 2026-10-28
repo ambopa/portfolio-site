@@ -6,20 +6,16 @@ import { useEffect, useRef, useState } from "react";
 export const AV1_TYPE = 'video/mp4; codecs="av01.0.08M.08"';
 
 type Props = {
-  // First frame of the video. It sits on top until the video is really playing, so a visitor
-  // always sees the picture at once and never sees an empty box or the browser's play button.
+  // First frame of the video, shown until the video is really playing
   poster?: string;
   alt: string;
   h264: string;
   av1?: string;
-  // Attach the sources (starts the download). Off again cancels a download that is no longer needed.
+  // Attach the sources (starts the download). Off again drops the video and frees its memory.
   load: boolean;
   play: boolean;
   // Sources are in the server HTML, so the download starts before any JS runs
   eager?: boolean;
-  // Safari in Low Power Mode refuses every video, muted or not, but still animates an MP4
-  // given to <img>. Use that when playback is refused.
-  imageFallback?: boolean;
   onPlaying?: () => void;
   onBuffered?: () => void;
 };
@@ -32,14 +28,13 @@ export default function LoopVideo({
   load,
   play,
   eager = false,
-  imageFallback = true,
   onPlaying,
   onBuffered,
 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
+  // Safari in Low Power Mode refuses every video, muted or not. The poster then stays.
   const [refused, setRefused] = useState(false);
-  const [fallbackShown, setFallbackShown] = useState(false);
   const attached = useRef(eager);
 
   // Attach or detach the sources; <source> changes only take effect after load()
@@ -71,13 +66,12 @@ export default function LoopVideo({
     return () => video.removeEventListener("canplaythrough", onBuffered);
   }, [onBuffered]);
 
-  const showPoster = !playing && !fallbackShown;
-
   return (
     <>
+      {/* Hidden until it plays: a video that cannot start yet shows nothing, not Safari's play button */}
       <video
         ref={videoRef}
-        className="absolute inset-0 h-full w-full object-cover"
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${playing ? "opacity-100" : "opacity-0"}`}
         muted
         loop
         playsInline
@@ -87,22 +81,14 @@ export default function LoopVideo({
           setPlaying(true);
           onPlaying?.();
         }}
+        onEmptied={() => setPlaying(false)}
       >
         {av1 && <source src={load ? av1 : undefined} type={AV1_TYPE} />}
         <source src={load ? h264 : undefined} type="video/mp4" />
       </video>
-      {refused && imageFallback && (
-        <img
-          className="absolute inset-0 h-full w-full object-cover"
-          src={h264}
-          alt=""
-          aria-hidden
-          onLoad={() => setFallbackShown(true)}
-        />
-      )}
       {poster && (
         <img
-          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${showPoster ? "opacity-100" : "pointer-events-none opacity-0"}`}
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${playing ? "pointer-events-none opacity-0" : "opacity-100"}`}
           src={poster}
           alt={alt}
           decoding="async"
