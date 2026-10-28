@@ -18,7 +18,6 @@ export default function ArchiveItem({ item, onOpen, priority = false }: Props) {
   const imgRef = useRef<HTMLImageElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
-  const [videoReady, setVideoReady] = useState(false);
 
   // Scroll-based reveal animation
   useEffect(() => {
@@ -107,10 +106,6 @@ export default function ArchiveItem({ item, onOpen, priority = false }: Props) {
     if (imgRef.current?.complete) setImgLoaded(true);
   }, []);
 
-  const handleVideoCanPlay = useCallback(() => {
-    setVideoReady(true);
-  }, []);
-
   const hasMedia = item.imageSrc || item.videoSrc || item.poster;
   const estimatedHeight =
     Math.round((item.aspectH / item.aspectW) * 360);
@@ -166,7 +161,8 @@ export default function ArchiveItem({ item, onOpen, priority = false }: Props) {
             {item.videoSrc && (
               <video
                 ref={videoRef}
-                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${videoReady ? "opacity-100" : "opacity-0"}`}
+                // stays visible: Safari refuses to autoplay a hidden video, and the poster is its first frame anyway
+                className="absolute inset-0 h-full w-full object-cover"
                 poster={item.poster}
                 muted
                 loop
@@ -174,7 +170,6 @@ export default function ArchiveItem({ item, onOpen, priority = false }: Props) {
                 // first row plays straight from the HTML, without waiting for JS
                 autoPlay={priority}
                 preload={priority ? "auto" : "none"}
-                onCanPlay={handleVideoCanPlay}
               >
                 {item.videoAv1Src && <source src={item.videoAv1Src} type={AV1_TYPE} />}
                 <source src={item.videoSrc} type="video/mp4" />

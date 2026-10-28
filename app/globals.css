@@ -118,3 +118,10 @@ input[type="range"]::-moz-range-thumb {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* Grid and lightbox videos have no controls: never show Safari's start-playback overlay */
+video::-webkit-media-controls,
+video::-webkit-media-controls-start-playback-button {
+  display: none !important;
+  -webkit-appearance: none;
+}
