@@ -58,8 +58,11 @@ function sanityToItems(projects: SanityProject[]): ArchiveItemType[] {
         imageSrc: optimizeUrl(rawUrl, 1200),
         fullSrc: optimizeUrl(rawUrl, 2800),
         poster: optimizeUrl(rawPoster, 1200),
+        fullPoster: optimizeUrl(rawPoster, 2800),
         videoSrc: g.videoUrl || undefined,
         videoAv1Src: g.videoUrl ? g.videoAv1Url || undefined : undefined,
+        videoHdSrc: g.videoUrl ? g.videoHdUrl || undefined : undefined,
+        videoHdAv1Src: g.videoUrl ? g.videoHdAv1Url || undefined : undefined,
       });
     }
   }

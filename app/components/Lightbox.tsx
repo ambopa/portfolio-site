@@ -115,14 +115,21 @@ export default function Lightbox({ item, items, onClose, onPrev, onNext }: Props
           <video
             ref={videoRef}
             key={item.id}
-            className="max-w-[90vw] max-h-[85vh] rounded-[12px] shadow-2xl"
-            poster={item.poster}
+            className="rounded-[12px] shadow-2xl"
+            poster={item.fullPoster || item.poster}
             muted
             loop
             playsInline
             controls={false}
-            style={{ aspectRatio: `${item.aspectW} / ${item.aspectH}` }}
+            preload="auto"
+            style={{
+              aspectRatio: `${item.aspectW} / ${item.aspectH}`,
+              // a video element sizes to its own resolution; fit it to the viewport instead
+              width: `min(90vw, calc(85vh * ${item.aspectW} / ${item.aspectH}))`,
+            }}
           >
+            {item.videoHdAv1Src && <source src={item.videoHdAv1Src} type={AV1_TYPE} />}
+            {item.videoHdSrc && <source src={item.videoHdSrc} type="video/mp4" />}
             {item.videoAv1Src && <source src={item.videoAv1Src} type={AV1_TYPE} />}
             <source src={item.videoSrc} type="video/mp4" />
           </video>
