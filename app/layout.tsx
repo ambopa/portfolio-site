@@ -14,10 +14,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://aleksei-shaikhelislamov.vercel.app"),
   title: "Aleksei Shaikhelislamov",
-  description: "Principal Product Designer × AI. Citizen of the World.",
+  // Link previews (messengers, social networks) don't read SVG: PNG and ICO copies of the favicon
   icons: {
-    icon: "/favicon.svg",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: { url: "/apple-touch-icon.png", sizes: "180x180" },
   },
 };
 
